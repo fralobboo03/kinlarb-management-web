@@ -1,5 +1,5 @@
 # KinlarbManagementWeb
-
+<!-- node version 20.19.6 (Currently using 64-bit executable) -->
 This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 21.2.3.
 
 ## Development server
