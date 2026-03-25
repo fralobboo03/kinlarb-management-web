@@ -1,0 +1,153 @@
+.app-container {
+  height: 100vh;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* --- Sidebar Styling --- */
+.app-sidebar {
+  width: 260px;
+  background-color: var(--sidebar-bg, #8B1E14);
+  color: var(--sidebar-text, #F5F5F5);
+  border-right: none;
+  font-family: inherit;
+  overflow-x: hidden;
+
+
+  .sidebar-header {
+    background: linear-gradient(135deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0) 100%);
+    
+    .logo-circle {
+      width: 70px;
+      height: 70px;
+      background: #ffffff;
+      border-radius: 50%;
+      color: var(--sidebar-bg, #8B1E14);
+      
+      .logo-icon {
+        font-size: 38px;
+        width: 38px;
+        height: 38px;
+      }
+    }
+    .shop-name {
+      font-weight: 700;
+      color: var(--sidebar-text, #F5F5F5);
+      letter-spacing: 0.5px;
+    }
+    .shop-subtitle {
+      color: var(--sidebar-accent, #F39C12);
+      opacity: 0.9;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+  }
+
+  .custom-nav-list {
+    .menu-item {
+      color: rgba(255, 255, 255, 0.7) !important;
+      margin: 6px 16px;
+      width: calc(100% - 32px);
+      border-radius: 8px;
+      transition: all 0.25s ease;
+
+      mat-icon {
+        color: rgba(255, 255, 255, 0.7);
+        transition: 0.25s;
+      }
+
+      // Hover Effect
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: #ffffff !important;
+        transform: translateX(5px);
+        mat-icon {
+          color: #ffffff;
+        }
+      }
+
+      // Active Menu Effect
+      &.active-link {
+        background-color: var(--accent-color, #F39C12);
+        color: #ffffff !important;
+        font-weight: 600;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.15);
+        
+        mat-icon {
+          color: #ffffff;
+        }
+      }
+    }
+  }
+
+  .sidebar-footer {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    
+    .footer-divider {
+      border-color: rgba(255,255,255,0.2);
+    }
+    .exit-link {
+      color: var(--sidebar-accent, #F39C12) !important;
+      font-weight: bold;
+      margin: 0 16px;
+      width: calc(100% - 32px);
+      border-radius: 8px;
+      transition: 0.2s;
+      
+      &:hover {
+        background-color: rgba(0,0,0,0.2);
+        color: #ffffff !important;
+      }
+      mat-icon {
+        color: inherit;
+      }
+    }
+  }
+}
+
+/* --- Topbar Styling --- */
+.app-topbar {
+  background-color: var(--topbar-bg, #ffffff);
+  color: var(--topbar-text, #2C2C2C);
+  height: 64px;
+  
+  .spacer {
+    flex: 1 1 auto;
+  }
+  
+  .menu-btn, .action-btn, .theme-btn {
+    color: var(--topbar-text, #2C2C2C);
+    transition: 0.2s;
+    font-weight: 500;
+    &:hover {
+      color: var(--accent-color, #F39C12);
+    }
+  }
+  
+  .user-btn {
+    color: var(--accent-color, #F39C12);
+  }
+}
+
+/* --- Main Content Area Styling --- */
+.bg-main {
+  background-color: var(--main-bg, #f4f6f8);
+  transition: background-color 0.3s ease;
+}
+
+.content-area {
+  height: calc(100vh - 64px);
+  overflow-y: auto;
+  
+  .content-card {
+    background: var(--card-bg, #ffffff);
+    color: var(--card-text, #333333);
+    border-radius: 12px;
+    min-height: 80vh;
+    border: 1px solid var(--border-color, #eaeaea);
+    transition: all 0.3s ease;
+  }
+}

@@ -1,0 +1,90 @@
+<mat-sidenav-container class="app-container" [ngClass]="currentTheme$ | async">
+  
+  <!-- === Sidebar (Left Menu) === -->
+  <mat-sidenav #sidenav mode="side" [opened]="isSidebarOpen" class="app-sidebar shadow">
+    <div class="sidebar-header d-flex flex-column align-items-center py-4">
+      <div class="logo-circle mb-3 shadow-sm d-flex justify-content-center align-items-center">
+        <mat-icon class="logo-icon">restaurant_menu</mat-icon>
+      </div>
+      <h3 class="shop-name m-0">{{ currentShop?.name || 'Loading...' }}</h3>
+      <small class="shop-subtitle">Management System</small>
+    </div>
+
+    <mat-nav-list class="pt-2 custom-nav-list">
+      <a mat-list-item [routerLink]="['dashboard']" routerLinkActive="active-link" class="menu-item">
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <div matListItemTitle>Dashboard</div>
+      </a>
+      
+      <a mat-list-item [routerLink]="['stock-in']" routerLinkActive="active-link" class="menu-item">
+        <mat-icon matListItemIcon>move_to_inbox</mat-icon>
+        <div matListItemTitle>Stock In (รับเข้า)</div>
+      </a>
+      
+      <a mat-list-item [routerLink]="['stock-out']" routerLinkActive="active-link" class="menu-item">
+        <mat-icon matListItemIcon>outbox</mat-icon>
+        <div matListItemTitle>Stock Out (เบิกออก)</div>
+      </a>
+      
+      <a mat-list-item [routerLink]="['history']" routerLinkActive="active-link" class="menu-item">
+        <mat-icon matListItemIcon>history</mat-icon>
+        <div matListItemTitle>History (ประวัติ)</div>
+      </a>
+    </mat-nav-list>
+
+    <div class="sidebar-footer">
+      <hr class="footer-divider mx-3">
+      <a mat-list-item routerLink="/shops" class="exit-link">
+        <mat-icon matListItemIcon>exit_to_app</mat-icon>
+        <div matListItemTitle>ออกไปหน้ารวมร้าน</div>
+      </a>
+    </div>
+  </mat-sidenav>
+
+  <!-- === Main Content Area === -->
+  <mat-sidenav-content class="app-content-wrapper bg-main">
+    
+    <!-- Topbar (Header) -->
+    <mat-toolbar class="app-topbar shadow-sm">
+      <button mat-icon-button (click)="toggleSidebar()" class="menu-btn" title="Toggle Sidebar">
+        <mat-icon>menu</mat-icon>
+      </button>
+      
+      <span class="spacer"></span>
+      
+      <!-- Theme Switcher -->
+      <button mat-button [matMenuTriggerFor]="themeMenu" class="theme-btn me-2">
+        <mat-icon class="me-1">palette</mat-icon> Theme
+      </button>
+      <mat-menu #themeMenu="matMenu">
+        <button mat-menu-item (click)="changeTheme('kinlarb-theme')">
+          <mat-icon style="color: #8B1E14;">circle</mat-icon> Kinlarb Red
+        </button>
+        <button mat-menu-item (click)="changeTheme('dark-theme')">
+          <mat-icon style="color: #2C2C2C;">circle</mat-icon> Dark Gray
+        </button>
+        <button mat-menu-item (click)="changeTheme('light-theme')">
+          <mat-icon style="color: #e0e0e0;">circle</mat-icon> Clean Light
+        </button>
+      </mat-menu>
+
+      <!-- Placeholder: Search -->
+      <button mat-icon-button class="action-btn me-1">
+        <mat-icon>search</mat-icon>
+      </button>
+      
+      <!-- Placeholder: User Profile -->
+      <button mat-icon-button class="user-btn">
+        <mat-icon>account_circle</mat-icon>
+      </button>
+    </mat-toolbar>
+
+    <!-- Router Outlet -->
+    <div class="content-area p-3 p-md-4">
+      <div class="content-card shadow-sm p-4">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
+    
+  </mat-sidenav-content>
+</mat-sidenav-container>
