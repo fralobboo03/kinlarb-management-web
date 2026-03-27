@@ -37,7 +37,7 @@ export class StockInComponent implements OnInit {
   savedStatus = false;
   lastSavedName = '';
 
-  readonly unitOptions: string[] = ['กก.', 'ขีด.', 'มัด', 'ถุง'];
+  readonly unitOptions: string[] = ['กก.', 'ขีด.', 'มัด', 'ถุง', "ขวด"];
 
   readonly stockInForm = this.fb.group({
     itemName: ['', [Validators.required]],

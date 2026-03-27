@@ -22,6 +22,7 @@ import { StockItem } from '../models/stock-item.model';
 import { StockTransaction } from '../models/stock-transaction.model';
 
 type TimeRange = 'daily' | 'weekly' | 'monthly';
+type FilterMode = 'preset' | 'custom';
 
 interface CustomDateRange {
   startDate: Date | null;
@@ -94,13 +95,17 @@ export class DashboardComponent implements OnInit {
   private document = inject(DOCUMENT);
 
   private readonly shopId$ = new BehaviorSubject<number | null>(null);
-  private readonly selectedRange$ = new BehaviorSubject<TimeRange>('monthly');
+  private readonly selectedRange$ = new BehaviorSubject<TimeRange | null>('monthly');
+  private readonly filterMode$ = new BehaviorSubject<FilterMode>('preset');
   private readonly customDateRange$ = new BehaviorSubject<CustomDateRange>({
     startDate: null,
     endDate: null
   });
+  private readonly defaultPresetRange: TimeRange = 'monthly';
+  private lastPresetRange: TimeRange = this.defaultPresetRange;
 
-  selectedRange: TimeRange = 'monthly';
+  selectedRange: TimeRange | null = this.defaultPresetRange;
+  filterMode: FilterMode = 'preset';
   startDate: Date | null = null;
   endDate: Date | null = null;
   dateRangeError = '';
@@ -147,10 +152,11 @@ export class DashboardComponent implements OnInit {
 
   dashboardVm$: Observable<DashboardViewModel> = combineLatest([
     this.shopId$,
+    this.filterMode$,
     this.selectedRange$,
     this.customDateRange$
   ]).pipe(
-    switchMap(([shopId, selectedRange, customDateRange]) => {
+    switchMap(([shopId, filterMode, selectedRange, customDateRange]) => {
       if (!shopId) {
         return of(this.createEmptyViewModel());
       }
@@ -165,6 +171,7 @@ export class DashboardComponent implements OnInit {
             inventoryItems ?? [],
             transactions ?? [],
             sales ?? [],
+            filterMode,
             selectedRange,
             customDateRange
           )
@@ -180,16 +187,45 @@ export class DashboardComponent implements OnInit {
     });
   }
 
-  onRangeChange(range: TimeRange): void {
-    this.selectedRange = range;
+  onFilterModeChange(mode: FilterMode): void {
+    if (mode === this.filterMode) {
+      return;
+    }
+
+    this.filterMode = mode;
+    this.filterMode$.next(mode);
+    this.dateRangeError = '';
+
+    if (mode === 'custom') {
+      this.selectedRange = null;
+      this.selectedRange$.next(null);
+      this.customDateRange$.next({ startDate: null, endDate: null });
+      return;
+    }
+
     this.startDate = null;
     this.endDate = null;
+    this.customDateRange$.next({ startDate: null, endDate: null });
+    this.selectedRange = this.lastPresetRange;
+    this.selectedRange$.next(this.lastPresetRange);
+  }
+
+  onRangeChange(range: TimeRange): void {
+    if (this.filterMode !== 'preset') {
+      return;
+    }
+
+    this.lastPresetRange = range;
+    this.selectedRange = range;
     this.dateRangeError = '';
     this.selectedRange$.next(range);
-    this.customDateRange$.next({ startDate: null, endDate: null });
   }
 
   onCustomDateChange(): void {
+    if (this.filterMode !== 'custom') {
+      return;
+    }
+
     if (!this.startDate || !this.endDate) {
       this.dateRangeError = '';
       this.customDateRange$.next({ startDate: null, endDate: null });
@@ -213,6 +249,10 @@ export class DashboardComponent implements OnInit {
   }
 
   clearCustomDateRange(): void {
+    if (this.filterMode !== 'custom') {
+      return;
+    }
+
     this.startDate = null;
     this.endDate = null;
     this.dateRangeError = '';
@@ -223,16 +263,17 @@ export class DashboardComponent implements OnInit {
     inventoryItems: StockItem[],
     transactions: StockTransaction[],
     sales: Sale[],
-    selectedRange: TimeRange,
+    filterMode: FilterMode,
+    selectedRange: TimeRange | null,
     customDateRange: CustomDateRange
   ): DashboardViewModel {
     const safeInventoryItems = inventoryItems ?? [];
     const safeTransactions = transactions ?? [];
     const safeSales = sales ?? [];
-    const activeFilter = this.getActiveDateFilter(selectedRange, customDateRange);
+    const activeFilter = this.getActiveDateFilter(filterMode, selectedRange, customDateRange);
     const filteredSales = this.filterSalesByDateRange(safeSales, activeFilter.startDate, activeFilter.endDate);
     const filteredTransactions = this.filterTransactionsByDateRange(safeTransactions, activeFilter.startDate, activeFilter.endDate);
-    const periodBreakdown = this.groupSalesByPeriod(filteredSales, activeFilter.isCustom ? 'daily' : selectedRange);
+    const periodBreakdown = this.groupSalesByPeriod(filteredSales, activeFilter.isCustom ? 'daily' : (selectedRange ?? this.defaultPresetRange));
     const menuBreakdown = this.groupSalesByMenu(filteredSales);
     const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.totalPrice, 0);
     const totalOrders = filteredSales.length;
@@ -421,8 +462,8 @@ export class DashboardComponent implements OnInit {
     };
   }
 
-  private getActiveDateFilter(selectedRange: TimeRange, customDateRange: CustomDateRange): ActiveDateFilter {
-    if (customDateRange.startDate && customDateRange.endDate) {
+  private getActiveDateFilter(filterMode: FilterMode, selectedRange: TimeRange | null, customDateRange: CustomDateRange): ActiveDateFilter {
+    if (filterMode === 'custom' && customDateRange.startDate && customDateRange.endDate) {
       return {
         label: `${this.formatDate(customDateRange.startDate)} - ${this.formatDate(customDateRange.endDate)}`,
         startDate: this.toStartOfDay(customDateRange.startDate),
@@ -431,9 +472,10 @@ export class DashboardComponent implements OnInit {
       };
     }
 
+    const effectiveRange = selectedRange ?? this.lastPresetRange;
     const now = new Date();
 
-    if (selectedRange === 'daily') {
+    if (effectiveRange === 'daily') {
       return {
         label: 'วันนี้',
         startDate: this.toStartOfDay(now),
@@ -442,7 +484,7 @@ export class DashboardComponent implements OnInit {
       };
     }
 
-    if (selectedRange === 'weekly') {
+    if (effectiveRange === 'weekly') {
       const startOfWeek = this.getStartOfIsoWeek(now);
       return {
         label: 'สัปดาห์นี้',
@@ -453,7 +495,7 @@ export class DashboardComponent implements OnInit {
     }
 
     return {
-      label: this.getPresetLabel('monthly'),
+      label: this.getPresetLabel(effectiveRange),
       startDate: new Date(now.getFullYear(), now.getMonth(), 1),
       endDate: this.toEndOfDay(now),
       isCustom: false

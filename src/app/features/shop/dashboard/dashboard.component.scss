@@ -84,6 +84,14 @@ $spacing-lg: 24px;
   }
 }
 
+.mode-toggle {
+  width: fit-content;
+}
+
+.preset-toggle {
+  width: fit-content;
+}
+
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

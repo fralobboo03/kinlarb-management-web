@@ -71,9 +71,21 @@
         </div>
 
         <mat-button-toggle-group
+          [ngModel]="filterMode"
+          (ngModelChange)="onFilterModeChange($event)"
+          aria-label="Filter mode"
+          class="mode-toggle"
+        >
+          <mat-button-toggle value="preset">Preset Mode</mat-button-toggle>
+          <mat-button-toggle value="custom">Custom Mode</mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <mat-button-toggle-group
           [ngModel]="selectedRange"
           (ngModelChange)="onRangeChange($event)"
+          [disabled]="filterMode === 'custom'"
           aria-label="Time range filter"
+          class="preset-toggle"
         >
           <mat-button-toggle value="daily">Daily</mat-button-toggle>
           <mat-button-toggle value="weekly">Weekly</mat-button-toggle>
@@ -82,7 +94,7 @@
 
         <mat-form-field appearance="outline" class="date-range-field">
           <mat-label>Custom Date Range</mat-label>
-          <mat-date-range-input [rangePicker]="picker">
+          <mat-date-range-input [rangePicker]="picker" [disabled]="filterMode !== 'custom'">
             <input matStartDate [(ngModel)]="startDate" (dateChange)="onCustomDateChange()" [ngModelOptions]="{ standalone: true }" placeholder="Start date">
             <input matEndDate [(ngModel)]="endDate" (dateChange)="onCustomDateChange()" [ngModelOptions]="{ standalone: true }" placeholder="End date">
           </mat-date-range-input>
@@ -90,7 +102,7 @@
           <mat-date-range-picker #picker></mat-date-range-picker>
         </mat-form-field>
 
-        <button mat-stroked-button type="button" class="clear-range-btn" (click)="clearCustomDateRange()" [disabled]="!startDate && !endDate">
+        <button mat-stroked-button type="button" class="clear-range-btn" (click)="clearCustomDateRange()" [disabled]="filterMode !== 'custom' || (!startDate && !endDate)">
           <mat-icon>event_busy</mat-icon>
           ล้างช่วงวันที่
         </button>
