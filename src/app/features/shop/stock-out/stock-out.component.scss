@@ -1,48 +1,32 @@
-// Spacing Variables
 $spacing-xs: 8px;
-$spacing-sm: 12px;
 $spacing-md: 16px;
 $spacing-lg: 24px;
-$spacing-xl: 32px;
 
-// Container
 .stock-out-container {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1000px;
   margin: 0 auto;
   padding: $spacing-lg;
   display: grid;
-  grid-template-columns: 1fr 350px;
-  gap: $spacing-xl;
-
-  @media (max-width: 1024px) {
-    grid-template-columns: 1fr;
-  }
-
-  @media (max-width: 768px) {
-    padding: $spacing-md;
-    gap: $spacing-lg;
-  }
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: $spacing-lg;
 }
 
 .content-wrapper {
   display: flex;
   flex-direction: column;
-  gap: $spacing-xl;
+  gap: $spacing-lg;
 }
 
-// Form Card
-.form-card {
-  background: var(--card-bg, #ffffff);
+.form-card,
+.reference-card {
+  background: var(--card-bg, #fff);
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
   border: 1px solid var(--border-color, #eaeaea);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
 
-  &:hover {
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-  }
-
+.form-card {
   mat-card-header {
     padding: $spacing-lg;
     border-bottom: 1px solid var(--border-color, #eaeaea);
@@ -54,138 +38,71 @@ $spacing-xl: 32px;
   }
 }
 
-// Header
 .header-content {
   display: flex;
   flex-direction: column;
-  gap: $spacing-sm;
+  gap: 8px;
 }
 
 .form-title {
+  margin: 0;
   display: flex;
   align-items: center;
   gap: $spacing-md;
   font-size: 24px;
-  font-weight: 600;
   color: var(--primary-color, #8B1E14);
-  margin: 0;
-  line-height: 1.4;
 
   .title-icon {
-    font-size: 28px;
-    width: 28px;
-    height: 28px;
     color: var(--accent-color, #F39C12);
   }
 }
 
 .form-subtitle {
-  font-size: 14px;
-  color: var(--card-text, #666666);
-  opacity: 0.8;
   margin: 0;
-  font-weight: 400;
+  color: var(--card-text, #666);
+  opacity: 0.8;
 }
 
-// Form Styling
 .stock-out-form {
   display: flex;
   flex-direction: column;
-  gap: $spacing-lg;
+  gap: $spacing-md;
 }
 
 .full-width {
   width: 100%;
 }
 
-// Material Form Field Customization
-::ng-deep {
-  .stock-out-form {
-    .mat-mdc-form-field {
-      .mdc-text-field {
-        background-color: rgba(0, 0, 0, 0.02);
-        transition: background-color 0.2s ease;
-
-        &:hover {
-          background-color: rgba(0, 0, 0, 0.05);
-        }
-      }
-
-      .mat-mdc-form-field-label {
-        color: var(--card-text, #333333) !important;
-      }
-
-      &.mat-focused .mdc-text-field {
-        background-color: transparent;
-      }
-    }
-  }
+::ng-deep .stock-out-form .mdc-text-field {
+  background-color: color-mix(in srgb, var(--card-text, #333) 3%, transparent);
 }
 
-// Material Icon in Form Fields
 mat-icon[matSuffix] {
   color: var(--accent-color, #F39C12) !important;
-  margin-left: $spacing-sm;
 }
 
-// Button Group
 .button-group {
   display: flex;
   gap: $spacing-md;
-  justify-content: flex-start;
   flex-wrap: wrap;
-  margin-top: $spacing-md;
+  margin-top: 4px;
 }
 
-// Buttons
 .btn-save,
-.btn-reset {
+.btn-reset,
+.btn-clear-all {
   min-width: 160px;
   height: 40px;
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  transition: all 0.3s ease;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: $spacing-sm;
-
-  mat-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-  }
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+  gap: 8px;
+  font-weight: 600;
 }
 
 .btn-save {
   background-color: var(--primary-color, #8B1E14) !important;
-  color: white !important;
-}
-
-.btn-clear-all {
-  border-color: #ff6b6b !important;
-  color: #ff6b6b !important;
-
-  &:hover:not(:disabled) {
-    background-color: rgba(255, 107, 107, 0.08);
-    border-color: #ff5252 !important;
-    color: #ff5252 !important;
-  }
-
-  &:active:not(:disabled) {
-    background-color: rgba(255, 107, 107, 0.12);
-  }
+  color: #fff !important;
 }
 
 .btn-reset {
@@ -193,27 +110,15 @@ mat-icon[matSuffix] {
   color: var(--accent-color, #F39C12) !important;
 }
 
-// Success Message
-.success-message {
-  animation: slideUp 0.3s ease-out;
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.btn-clear-all {
+  border-color: var(--danger-color, #C62828) !important;
+  color: var(--danger-color, #C62828) !important;
 }
 
 .alert-card {
-  background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 100%);
-  border-left: 4px solid #4CAF50;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.12);
-  border-radius: 8px;
+  border-radius: 12px;
+  border-left: 4px solid var(--success-color, #2E7D32);
+  background: color-mix(in srgb, var(--success-color, #2E7D32) 12%, var(--card-bg, #fff));
 }
 
 .alert-content {
@@ -223,44 +128,27 @@ mat-icon[matSuffix] {
   padding: $spacing-md;
 }
 
-.alert-icon {
-  color: #4CAF50;
-  font-size: 28px;
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
+.alert-icon,
+.alert-title {
+  color: var(--success-color, #2E7D32);
 }
 
 .alert-title {
+  margin: 0 0 4px;
   font-weight: 600;
-  color: #4CAF50;
-  margin: 0 0 $spacing-xs 0;
-  font-size: 14px;
 }
 
 .alert-message {
-  color: #2E7D32;
   margin: 0;
-  font-size: 13px;
 }
 
-// Reference Card
 .reference-card {
-  background: var(--card-bg, #ffffff);
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  border: 1px solid var(--border-color, #eaeaea);
-  max-height: 500px;
-  overflow-y: auto;
-
-  @media (max-width: 1024px) {
-    max-height: none;
-  }
+  max-height: 520px;
+  overflow: auto;
 
   mat-card-header {
-    padding: $spacing-lg;
+    padding: $spacing-md $spacing-lg;
     border-bottom: 1px solid var(--border-color, #eaeaea);
-    margin: (-$spacing-lg) (-$spacing-lg) $spacing-md (-$spacing-lg);
   }
 
   mat-card-content {
@@ -269,21 +157,15 @@ mat-icon[matSuffix] {
 }
 
 .ref-title {
+  margin: 0;
   display: flex;
   align-items: center;
-  gap: $spacing-md;
-  font-size: 16px;
-  font-weight: 600;
+  gap: 8px;
   color: var(--primary-color, #8B1E14);
-  margin: 0;
 
   mat-icon {
     color: var(--accent-color, #F39C12);
   }
-}
-
-.ref-content {
-  padding: 0 !important;
 }
 
 .stock-list {
@@ -291,86 +173,87 @@ mat-icon[matSuffix] {
 }
 
 .stock-item {
-  background-color: rgba(0, 0, 0, 0.02);
   margin-bottom: $spacing-xs;
-  border-radius: 6px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  padding: $spacing-sm $spacing-md !important;
+  background: color-mix(in srgb, var(--card-text, #333) 3%, transparent);
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.06);
-    transform: translateX(4px);
-  }
-
-  &.last {
-    margin-bottom: 0;
+    background: color-mix(in srgb, var(--accent-color, #F39C12) 10%, transparent);
   }
 }
 
 .item-name {
-  font-weight: 500;
-  color: var(--card-text, #333333);
+  font-weight: 600;
 }
 
 .item-qty {
-  display: flex;
-  align-items: center;
-  gap: $spacing-sm;
-  color: var(--card-text, #666666);
   font-size: 12px;
+  opacity: 0.8;
 }
 
 .qty-badge {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 24px;
-  height: 24px;
-  background-color: var(--accent-color, #F39C12);
-  color: white;
-  border-radius: 50%;
-  font-weight: 600;
+  min-width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--accent-color, #F39C12);
+  color: #fff;
+  font-weight: 700;
   font-size: 11px;
 }
 
 .empty-state {
   text-align: center;
   padding: $spacing-lg;
-  color: var(--card-text, #999999);
+  opacity: 0.75;
 
   mat-icon {
-    font-size: 48px;
-    width: 48px;
-    height: 48px;
-    opacity: 0.3;
-    margin: 0 auto $spacing-sm;
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
   }
 
   p {
-    margin: 0;
-    font-size: 14px;
+    margin: 4px 0 0;
   }
 }
 
-// Responsive Design
-@media (max-width: 480px) {
-  .form-card mat-card-header,
-  .form-card mat-card-content {
+@media (max-width: 1024px) {
+  .stock-out-container {
+    grid-template-columns: 1fr;
+  }
+
+  .reference-card {
+    max-height: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .stock-out-container {
     padding: $spacing-md;
   }
 
   .form-title {
-    font-size: 20px;
+    font-size: 22px;
   }
+}
 
+@media (max-width: 480px) {
   .button-group {
     flex-direction: column;
-    gap: $spacing-md;
   }
 
   .btn-save,
-  .btn-reset {
+  .btn-reset,
+  .btn-clear-all {
     width: 100%;
+  }
+
+  .form-card mat-card-header,
+  .form-card mat-card-content {
+    padding: $spacing-md;
   }
 }
