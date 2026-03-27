@@ -1,68 +1,155 @@
-<div class="dashboard-container">
+<div class="dashboard-container" *ngIf="dashboardVm$ | async as vm">
   <div class="page-header">
-    <h1 class="page-title">
-      <mat-icon class="title-icon">dashboard</mat-icon>
-      Dashboard Overview
-    </h1>
-    <p class="page-subtitle">สรุปภาพรวมสต็อก ต้นทุน และกำไรของร้าน</p>
-  </div>
-
-  <div class="metrics-grid" *ngIf="metrics$ | async as metrics">
-    <mat-card class="metric-card">
-      <div class="metric-icon metric-icon-stock">
-        <mat-icon>inventory_2</mat-icon>
-      </div>
-      <div class="metric-content">
-        <p class="metric-label">รายการสินค้า</p>
-        <h3 class="metric-value">{{ metrics.totalItems }}</h3>
-      </div>
-    </mat-card>
-
-    <mat-card class="metric-card">
-      <div class="metric-icon metric-icon-total">
-        <mat-icon>stacked_bar_chart</mat-icon>
-      </div>
-      <div class="metric-content">
-        <p class="metric-label">จำนวนคงเหลือรวม</p>
-        <h3 class="metric-value">{{ metrics.totalStock }}</h3>
-      </div>
-    </mat-card>
-
-    <mat-card class="metric-card">
-      <div class="metric-icon metric-icon-warning">
-        <mat-icon>warning_amber</mat-icon>
-      </div>
-      <div class="metric-content">
-        <p class="metric-label">สินค้าใกล้หมด</p>
-        <h3 class="metric-value">{{ metrics.lowStockItems }}</h3>
-      </div>
-    </mat-card>
-
-    <mat-card class="metric-card" [class.profit-negative]="metrics.totalProfit < 0">
-      <div class="metric-icon" [class.metric-icon-profit]="metrics.totalProfit >= 0" [class.metric-icon-loss]="metrics.totalProfit < 0">
-        <mat-icon>{{ metrics.totalProfit >= 0 ? 'trending_up' : 'trending_down' }}</mat-icon>
-      </div>
-      <div class="metric-content">
-        <p class="metric-label">กำไรเดือนนี้</p>
-        <h3 class="metric-value">{{ metrics.totalProfit | number:'1.2-2' }} ฿</h3>
-      </div>
-    </mat-card>
-  </div>
-
-  <mat-card class="inventory-card" *ngIf="remainingStock$ | async as items">
-    <div class="inventory-header">
-      <h2>
-        <mat-icon>inventory</mat-icon>
-        สถานะสินค้าปัจจุบัน
-      </h2>
-      <span class="inventory-count">{{ items.length }} รายการ</span>
+    <div>
+      <h1 class="page-title">
+        <mat-icon class="title-icon">dashboard</mat-icon>
+        Dashboard Overview
+      </h1>
+      <p class="page-subtitle">วิเคราะห์ยอดขาย แนวโน้มรายได้ และภาพรวมสต็อกของร้านในมุมเดียว</p>
     </div>
 
-    <div class="inventory-grid" *ngIf="items.length > 0; else emptyState">
-      <div class="inventory-item" *ngFor="let item of items" [class.is-low]="item.quantity > 0 && item.quantity < 5" [class.is-empty]="item.quantity <= 0">
+    <mat-card class="filter-card">
+      <mat-card-content>
+        <div class="filter-copy">
+          <span class="filter-label">ช่วงการวิเคราะห์</span>
+          <p>เลือกมุมมองรายวัน รายสัปดาห์ หรือรายเดือน</p>
+        </div>
+
+        <mat-button-toggle-group
+          [ngModel]="selectedRange"
+          (ngModelChange)="onRangeChange($event)"
+          aria-label="Time range filter"
+        >
+          <mat-button-toggle value="daily">Daily</mat-button-toggle>
+          <mat-button-toggle value="weekly">Weekly</mat-button-toggle>
+          <mat-button-toggle value="monthly">Monthly</mat-button-toggle>
+        </mat-button-toggle-group>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="metrics-grid">
+    <mat-card class="metric-card sales-card">
+      <div class="metric-icon metric-icon-revenue">
+        <mat-icon>payments</mat-icon>
+      </div>
+      <div class="metric-content">
+        <p class="metric-label">Total Revenue</p>
+        <h3 class="metric-value">{{ vm.totalRevenue | number:'1.2-2' }} ฿</h3>
+      </div>
+    </mat-card>
+
+    <mat-card class="metric-card sales-card">
+      <div class="metric-icon metric-icon-orders">
+        <mat-icon>receipt_long</mat-icon>
+      </div>
+      <div class="metric-content">
+        <p class="metric-label">Total Orders</p>
+        <h3 class="metric-value">{{ vm.totalOrders }}</h3>
+      </div>
+    </mat-card>
+
+    <mat-card class="metric-card sales-card">
+      <div class="metric-icon metric-icon-top-menu">
+        <mat-icon>emoji_events</mat-icon>
+      </div>
+      <div class="metric-content">
+        <p class="metric-label">Top Menu</p>
+        <h3 class="metric-value metric-value-text">{{ vm.topMenu }}</h3>
+      </div>
+    </mat-card>
+
+    <mat-card class="metric-card sales-card">
+      <div class="metric-icon metric-icon-average">
+        <mat-icon>insights</mat-icon>
+      </div>
+      <div class="metric-content">
+        <p class="metric-label">Average per Order</p>
+        <h3 class="metric-value">{{ vm.averagePerOrder | number:'1.2-2' }} ฿</h3>
+      </div>
+    </mat-card>
+  </div>
+
+  <div class="analytics-grid">
+    <mat-card class="analytics-card line-chart-card">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Revenue Trend</h2>
+          <p class="section-subtitle">รายได้รวมตามช่วงเวลาที่เลือก</p>
+        </div>
+      </div>
+
+      <div class="chart-shell" *ngIf="vm.periodBreakdown.length > 0; else noSalesTrend">
+        <canvas baseChart [data]="vm.lineChartData" [options]="lineChartOptions" [type]="'line'"></canvas>
+      </div>
+
+      <div class="period-breakdown" *ngIf="vm.periodBreakdown.length > 0">
+        <div class="period-row" *ngFor="let period of vm.periodBreakdown">
+          <span class="period-label">{{ period.label }}</span>
+          <span class="period-qty">{{ period.quantitySold | number:'1.0-0' }} รายการ</span>
+          <strong class="period-revenue">{{ period.revenue | number:'1.2-2' }} ฿</strong>
+        </div>
+      </div>
+    </mat-card>
+
+    <mat-card class="analytics-card bar-chart-card">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Top-Selling Menus</h2>
+          <p class="section-subtitle">เมนูที่ขายดีที่สุดตามจำนวนที่ขาย</p>
+        </div>
+      </div>
+
+      <div class="chart-shell" *ngIf="vm.menuBreakdown.length > 0; else noMenuSales">
+        <canvas baseChart [data]="vm.barChartData" [options]="barChartOptions" [type]="'bar'"></canvas>
+      </div>
+    </mat-card>
+
+    <mat-card class="analytics-card ranking-card">
+      <div class="section-header">
+        <div>
+          <h2 class="section-title">Menu Ranking</h2>
+          <p class="section-subtitle">สรุปยอดขายต่อเมนูและจัดอันดับ</p>
+        </div>
+      </div>
+
+      <div class="ranking-list" *ngIf="vm.menuBreakdown.length > 0; else noRanking">
+        <div class="ranking-row" *ngFor="let menu of vm.menuBreakdown.slice(0, 5); let index = index">
+          <div class="ranking-main">
+            <span class="rank-badge">#{{ index + 1 }}</span>
+            <div>
+              <p class="ranking-name">{{ menu.menuName }}</p>
+              <p class="ranking-meta">{{ menu.quantitySold | number:'1.0-0' }} รายการ • {{ menu.orderCount }} ออเดอร์</p>
+            </div>
+          </div>
+          <strong class="ranking-revenue">{{ menu.revenue | number:'1.2-2' }} ฿</strong>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+
+  <mat-card class="inventory-card">
+    <div class="inventory-header">
+      <div>
+        <h2>
+          <mat-icon>inventory</mat-icon>
+          Inventory Snapshot
+        </h2>
+        <p class="inventory-subtitle">ติดตามจำนวนคงเหลือและรายการที่ควรเติมสต็อก</p>
+      </div>
+
+      <div class="inventory-summary">
+        <span class="inventory-pill">{{ vm.totalItems }} รายการ</span>
+        <span class="inventory-pill inventory-pill-warn">ใกล้หมด {{ vm.lowStockItems }}</span>
+        <span class="inventory-pill">คงเหลือรวม {{ vm.totalStock | number:'1.0-2' }}</span>
+      </div>
+    </div>
+
+    <div class="inventory-grid" *ngIf="vm.inventoryItems.length > 0; else emptyState">
+      <div class="inventory-item" *ngFor="let item of vm.inventoryItems" [class.is-low]="item.quantity > 0 && item.quantity < 5" [class.is-empty]="item.quantity <= 0">
         <div class="item-main">
           <p class="item-name">{{ item.name }}</p>
-          <p class="item-qty">{{ item.quantity }}</p>
+          <p class="item-qty">{{ item.quantity | number:'1.0-2' }}</p>
         </div>
         <span class="item-status" [class.status-ok]="item.quantity >= 5" [class.status-low]="item.quantity > 0 && item.quantity < 5" [class.status-empty]="item.quantity <= 0">
           {{ item.quantity <= 0 ? 'หมดสต็อก' : item.quantity < 5 ? 'ใกล้หมด' : 'พร้อมขาย' }}
@@ -79,3 +166,24 @@
     </ng-template>
   </mat-card>
 </div>
+
+<ng-template #noSalesTrend>
+  <div class="empty-chart-state">
+    <mat-icon>show_chart</mat-icon>
+    <p>ยังไม่มีข้อมูลยอดขายสำหรับสร้างกราฟแนวโน้ม</p>
+  </div>
+</ng-template>
+
+<ng-template #noMenuSales>
+  <div class="empty-chart-state">
+    <mat-icon>bar_chart</mat-icon>
+    <p>ยังไม่มีข้อมูลยอดขายรายเมนู</p>
+  </div>
+</ng-template>
+
+<ng-template #noRanking>
+  <div class="empty-chart-state compact-empty-state">
+    <mat-icon>leaderboard</mat-icon>
+    <p>ยังไม่มีเมนูที่ถูกขาย</p>
+  </div>
+</ng-template>

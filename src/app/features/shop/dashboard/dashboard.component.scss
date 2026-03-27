@@ -11,6 +11,10 @@ $spacing-lg: 24px;
 
 .page-header {
   margin-bottom: $spacing-lg;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-lg;
 }
 
 .page-title {
@@ -33,6 +37,38 @@ $spacing-lg: 24px;
   opacity: 0.8;
 }
 
+.filter-card {
+  min-width: 320px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #eaeaea);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  mat-card-content {
+    padding: $spacing-md;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+.filter-copy {
+  .filter-label {
+    display: inline-block;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    color: var(--accent-color, #f39c12);
+    margin-bottom: 4px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--card-text, #666);
+    opacity: 0.8;
+  }
+}
+
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -48,6 +84,10 @@ $spacing-lg: 24px;
   border-radius: 12px;
   border: 1px solid var(--border-color, #eaeaea);
   background: var(--card-bg, #fff);
+}
+
+.sales-card {
+  min-height: 116px;
 }
 
 .metric-icon {
@@ -69,6 +109,26 @@ $spacing-lg: 24px;
 .metric-icon-total {
   background: color-mix(in srgb, var(--accent-color, #F39C12) 15%, transparent);
   color: var(--accent-color, #F39C12);
+}
+
+.metric-icon-revenue {
+  background: color-mix(in srgb, var(--primary-color, #8B1E14) 16%, transparent);
+  color: var(--primary-color, #8B1E14);
+}
+
+.metric-icon-orders {
+  background: color-mix(in srgb, var(--accent-color, #F39C12) 15%, transparent);
+  color: var(--accent-color, #F39C12);
+}
+
+.metric-icon-top-menu {
+  background: color-mix(in srgb, var(--success-color, #2E7D32) 14%, transparent);
+  color: var(--success-color, #2E7D32);
+}
+
+.metric-icon-average {
+  background: color-mix(in srgb, var(--warn-color, #b26a00) 12%, transparent);
+  color: var(--warn-color, #b26a00);
 }
 
 .metric-icon-warning {
@@ -99,6 +159,118 @@ $spacing-lg: 24px;
   color: var(--card-text, #333);
 }
 
+.metric-value-text {
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.analytics-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
+}
+
+.analytics-card {
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #eaeaea);
+  padding: $spacing-lg;
+}
+
+.line-chart-card {
+  grid-column: 1 / 2;
+}
+
+.bar-chart-card,
+.ranking-card {
+  min-height: 320px;
+}
+
+.section-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: $spacing-md;
+  margin-bottom: $spacing-md;
+}
+
+.section-title {
+  margin: 0 0 4px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--primary-color, #8B1E14);
+}
+
+.section-subtitle,
+.inventory-subtitle {
+  margin: 0;
+  color: var(--card-text, #666);
+  opacity: 0.8;
+}
+
+.chart-shell {
+  position: relative;
+  min-height: 280px;
+}
+
+.period-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: $spacing-md;
+}
+
+.period-row,
+.ranking-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-md;
+  padding: 12px 0;
+  border-top: 1px solid color-mix(in srgb, var(--border-color, #eaeaea) 70%, transparent);
+}
+
+.period-label,
+.ranking-name {
+  font-weight: 600;
+  color: var(--card-text, #333);
+}
+
+.period-qty,
+.ranking-meta {
+  color: var(--card-text, #666);
+  opacity: 0.8;
+  font-size: 13px;
+}
+
+.period-revenue,
+.ranking-revenue {
+  color: var(--primary-color, #8B1E14);
+}
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.ranking-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.rank-badge {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--accent-color, #F39C12) 16%, transparent);
+  color: var(--accent-color, #F39C12);
+  font-weight: 700;
+}
+
 .inventory-card {
   border-radius: 12px;
   border: 1px solid var(--border-color, #eaeaea);
@@ -110,6 +282,7 @@ $spacing-lg: 24px;
   align-items: center;
   justify-content: space-between;
   margin-bottom: $spacing-md;
+  gap: $spacing-md;
 
   h2 {
     display: flex;
@@ -119,6 +292,29 @@ $spacing-lg: 24px;
     font-size: 18px;
     color: var(--primary-color, #8B1E14);
   }
+}
+
+.inventory-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: $spacing-xs;
+}
+
+.inventory-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary-color, #8B1E14) 10%, transparent);
+  color: var(--primary-color, #8B1E14);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.inventory-pill-warn {
+  background: color-mix(in srgb, var(--warn-color, #b26a00) 14%, transparent);
+  color: var(--warn-color, #b26a00);
 }
 
 .inventory-count {
@@ -210,12 +406,60 @@ $spacing-lg: 24px;
   }
 }
 
+.empty-chart-state {
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-xs;
+  text-align: center;
+  color: var(--card-text, #666);
+  opacity: 0.8;
+
+  mat-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 40px;
+  }
+
+  p {
+    margin: 0;
+  }
+}
+
+.compact-empty-state {
+  min-height: 180px;
+}
+
 @media (max-width: 768px) {
   .dashboard-container {
     padding: $spacing-md;
   }
 
+  .page-header {
+    flex-direction: column;
+  }
+
+  .filter-card {
+    width: 100%;
+    min-width: 0;
+  }
+
   .page-title {
     font-size: 24px;
+  }
+
+  .analytics-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .inventory-summary {
+    justify-content: flex-start;
   }
 }
