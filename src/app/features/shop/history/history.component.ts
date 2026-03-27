@@ -40,7 +40,7 @@ export class HistoryComponent implements OnInit {
 
   history$: Observable<StockTransaction[]>;
   filteredHistory$: Observable<StockTransaction[]>;
-  displayedColumns: string[] = ['date', 'type', 'name', 'quantity', 'cost'];
+  displayedColumns: string[] = ['date', 'type', 'name', 'unit', 'quantity', 'cost'];
 
   constructor() {
     this.history$ = this.shopId$.pipe(
@@ -57,8 +57,11 @@ export class HistoryComponent implements OnInit {
 
         return data.filter((item) => {
           const typeLabel = item.type === 'IN' ? 'รับเข้า' : 'เบิกออก';
+          const unitLabel = (item.unit ?? '').toLowerCase();
+
           return (
             item.name.toLowerCase().includes(query) ||
+            unitLabel.includes(query) ||
             typeLabel.includes(query) ||
             item.type.toLowerCase().includes(query)
           );

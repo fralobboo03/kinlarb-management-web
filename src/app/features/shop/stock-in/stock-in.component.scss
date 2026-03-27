@@ -61,8 +61,18 @@ $spacing-lg: 24px;
   gap: $spacing-md;
 }
 
+.field-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-md;
+}
+
 .full-width {
   width: 100%;
+}
+
+.readonly-field input[readonly] {
+  cursor: default;
 }
 
 ::ng-deep .stock-in-form .mdc-text-field {
@@ -135,6 +145,10 @@ mat-icon[matSuffix] {
 
   .form-title {
     font-size: 22px;
+  }
+
+  .field-row {
+    grid-template-columns: 1fr;
   }
 }
 

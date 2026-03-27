@@ -16,7 +16,7 @@
           matInput
           [(ngModel)]="searchTerm"
           (ngModelChange)="onSearchTermChange($event)"
-          placeholder="ค้นหาด้วยชื่อสินค้า หรือประเภท"
+          placeholder="ค้นหาด้วยชื่อสินค้า, หน่วย หรือประเภท"
         >
       </mat-form-field>
     </div>
@@ -51,6 +51,14 @@
           <td mat-cell *matCellDef="let element">{{ element.name }}</td>
         </ng-container>
 
+        <ng-container matColumnDef="unit">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-icon class="col-icon">straighten</mat-icon>
+            หน่วย
+          </th>
+          <td mat-cell *matCellDef="let element">{{ element.unit || '-' }}</td>
+        </ng-container>
+
         <ng-container matColumnDef="quantity">
           <th mat-header-cell *matHeaderCellDef class="align-right">
             <mat-icon class="col-icon">numbers</mat-icon>
@@ -65,7 +73,7 @@
             มูลค่า
           </th>
           <td mat-cell *matCellDef="let element" class="align-right">
-            {{ (element.cost ?? element.price) ? ((element.cost ?? element.price) | number:'1.2-2') : '-' }}
+            {{ (element.totalCost ?? element.cost ?? element.price) ? ((element.totalCost ?? element.cost ?? element.price) | number:'1.2-2') : '-' }}
           </td>
         </ng-container>
 

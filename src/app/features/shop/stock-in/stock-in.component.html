@@ -1,43 +1,55 @@
 <div class="stock-in-container">
   <mat-card class="form-card">
-    <!-- Header Section -->
     <mat-card-header>
       <div class="header-content">
         <h2 class="form-title">
           <mat-icon class="title-icon">move_to_inbox</mat-icon>
           รับของเข้าร้าน (Stock In)
         </h2>
-        <p class="form-subtitle">บันทึกรายการสินค้าที่นำเข้าเข้าร้าน</p>
+        <p class="form-subtitle">บันทึกรายการสินค้าด้วยหน่วย ราคา/หน่วย และคำนวณต้นทุนอัตโนมัติ</p>
       </div>
     </mat-card-header>
 
-    <!-- Form Content -->
     <mat-card-content>
-      <form class="stock-in-form" (ngSubmit)="saveStockIn()">
-        <!-- Item Name Field -->
-        <mat-form-field class="full-width">
+      <form class="stock-in-form" [formGroup]="stockInForm" (ngSubmit)="saveStockIn()">
+        <mat-form-field appearance="outline" class="full-width">
           <mat-label>ชื่อสินค้า *</mat-label>
-          <input matInput [(ngModel)]="itemName" name="itemName" placeholder="เช่น เนื้อหมู, ข้าวคั่ว, น้ำเปล่า" required>
+          <input matInput formControlName="itemName" placeholder="เช่น เนื้อหมู, ข้าวคั่ว, น้ำเปล่า">
           <mat-icon matSuffix>inventory_2</mat-icon>
         </mat-form-field>
 
-        <!-- Quantity Field -->
-        <mat-form-field class="full-width">
-          <mat-label>จำนวน *</mat-label>
-          <input matInput type="number" [(ngModel)]="quantity" name="quantity" min="1" required>
-          <mat-icon matSuffix>numbers</mat-icon>
-        </mat-form-field>
+        <div class="field-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>หน่วย *</mat-label>
+            <mat-select formControlName="unit">
+              <mat-option *ngFor="let unit of unitOptions" [value]="unit">{{ unit }}</mat-option>
+            </mat-select>
+            <mat-icon matSuffix>straighten</mat-icon>
+          </mat-form-field>
 
-        <!-- Cost Field -->
-        <mat-form-field class="full-width">
-          <mat-label>ต้นทุนรวม (ถ้ามี)</mat-label>
-          <input matInput type="number" [(ngModel)]="cost" name="cost" min="0" placeholder="ใส่จำนวนเงิน">
-          <mat-icon matSuffix>attach_money</mat-icon>
-        </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>จำนวน *</mat-label>
+            <input matInput type="number" min="0.0001" step="0.01" formControlName="quantity">
+            <mat-icon matSuffix>numbers</mat-icon>
+          </mat-form-field>
+        </div>
 
-        <!-- Action Buttons -->
+        <div class="field-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>ราคา / หน่วย *</mat-label>
+            <input matInput type="number" min="0.0001" step="0.01" formControlName="pricePerUnit">
+            <mat-icon matSuffix>sell</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width readonly-field">
+            <mat-label>ต้นทุนรวม (อัตโนมัติ)</mat-label>
+            <input matInput type="number" formControlName="totalCost" readonly>
+            <mat-icon matSuffix>attach_money</mat-icon>
+          </mat-form-field>
+        </div>
+
         <div class="button-group">
-          <button mat-raised-button color="primary" type="submit" [disabled]="!itemName || quantity <= 0" class="btn-save">
+          <button mat-raised-button color="primary" type="submit" [disabled]="stockInForm.invalid" class="btn-save">
             <mat-icon>check_circle</mat-icon>
             บันทึกรับเข้า
           </button>
@@ -50,7 +62,6 @@
     </mat-card-content>
   </mat-card>
 
-  <!-- Success Message -->
   <mat-card class="success-message alert-card" *ngIf="savedStatus">
     <div class="alert-content">
       <mat-icon class="alert-icon">check_circle</mat-icon>

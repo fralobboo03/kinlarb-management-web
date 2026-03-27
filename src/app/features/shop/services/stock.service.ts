@@ -13,7 +13,7 @@ export class StockService {
   transactions$ = this.transactionsSubject.asObservable();
   private isBrowser: boolean;
 
-  constructor(@Inject(PLATFORM_ID) platformId: Object) {
+  constructor(@Inject(PLATFORM_ID) platformId: object) {
     this.isBrowser = isPlatformBrowser(platformId);
     if (this.isBrowser) {
       this.transactionsSubject.next(this.loadTransactions());
@@ -35,41 +35,57 @@ export class StockService {
     this.transactionsSubject.next(transactions);
   }
 
-  addStockIn(shopId: number, name: string, quantity: number, cost?: number): void {
+  addStockIn(shopId: number, name: string, unit: string, quantity: number, pricePerUnit: number): void {
+    const totalCost = quantity * pricePerUnit;
+
     this.addTransaction({
-      shopId, type: 'IN', name, quantity, cost, date: new Date()
+      shopId,
+      type: 'IN',
+      name,
+      unit,
+      quantity,
+      pricePerUnit,
+      totalCost,
+      cost: totalCost,
+      date: new Date()
     });
   }
 
   addStockOut(shopId: number, name: string, quantity: number, price?: number): void {
     this.addTransaction({
-      shopId, type: 'OUT', name, quantity, price, date: new Date()
+      shopId,
+      type: 'OUT',
+      name,
+      quantity,
+      price,
+      date: new Date()
     });
   }
 
   private addTransaction(tx: StockTransaction): void {
     const transactions = this.transactionsSubject.getValue();
-    tx.id = new Date().getTime(); // simple ID
+    tx.id = new Date().getTime();
     transactions.push(tx);
     this.saveTransactions(transactions);
   }
 
   getHistory(shopId: number): Observable<StockTransaction[]> {
     return this.transactions$.pipe(
-      map(txs => txs
-        .filter(tx => tx.shopId === shopId)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      map((txs) =>
+        txs
+          .filter((tx) => tx.shopId === shopId)
+          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
       )
     );
   }
 
-  getRemainingStock(shopId: number): Observable<{ name: string, quantity: number }[]> {
+  getRemainingStock(shopId: number): Observable<{ name: string; quantity: number }[]> {
     return this.transactions$.pipe(
-      map(txs => {
-        const shopTxs = txs.filter(tx => tx.shopId === shopId);
+      map((txs) => {
+        const shopTxs = txs.filter((tx) => tx.shopId === shopId);
         const stockMap = new Map<string, number>();
 
-        shopTxs.forEach(tx => {
+        shopTxs.forEach((tx) => {
           const current = stockMap.get(tx.name) || 0;
           if (tx.type === 'IN') {
             stockMap.set(tx.name, current + tx.quantity);
@@ -83,23 +99,23 @@ export class StockService {
     );
   }
 
-  getMonthlySummary(shopId: number): Observable<{ cost: number, revenue: number, profit: number }> {
+  getMonthlySummary(shopId: number): Observable<{ cost: number; revenue: number; profit: number }> {
     return this.transactions$.pipe(
-      map(txs => {
+      map((txs) => {
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
         let cost = 0;
         let revenue = 0;
 
-        txs.forEach(tx => {
+        txs.forEach((tx) => {
           if (tx.shopId === shopId) {
             const txDate = new Date(tx.date);
             if (txDate >= startOfMonth && txDate <= now) {
-              if (tx.type === 'IN' && tx.cost) {
-                cost += tx.cost;
-              } else if (tx.type === 'OUT' && tx.price) {
-                revenue += tx.price;
+              if (tx.type === 'IN') {
+                cost += tx.totalCost ?? tx.cost ?? 0;
+              } else if (tx.type === 'OUT') {
+                revenue += tx.price ?? 0;
               }
             }
           }
@@ -112,7 +128,7 @@ export class StockService {
 
   clearAllStock(shopId: number): void {
     const transactions = this.transactionsSubject.getValue();
-    const filteredTransactions = transactions.filter(tx => tx.shopId !== shopId);
+    const filteredTransactions = transactions.filter((tx) => tx.shopId !== shopId);
     this.saveTransactions(filteredTransactions);
   }
 }
