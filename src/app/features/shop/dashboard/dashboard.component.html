@@ -7,25 +7,6 @@
       </h1>
       <p class="page-subtitle">วิเคราะห์ยอดขาย แนวโน้มรายได้ และภาพรวมสต็อกของร้านในมุมเดียว</p>
     </div>
-
-    <mat-card class="filter-card">
-      <mat-card-content>
-        <div class="filter-copy">
-          <span class="filter-label">ช่วงการวิเคราะห์</span>
-          <p>เลือกมุมมองรายวัน รายสัปดาห์ หรือรายเดือน</p>
-        </div>
-
-        <mat-button-toggle-group
-          [ngModel]="selectedRange"
-          (ngModelChange)="onRangeChange($event)"
-          aria-label="Time range filter"
-        >
-          <mat-button-toggle value="daily">Daily</mat-button-toggle>
-          <mat-button-toggle value="weekly">Weekly</mat-button-toggle>
-          <mat-button-toggle value="monthly">Monthly</mat-button-toggle>
-        </mat-button-toggle-group>
-      </mat-card-content>
-    </mat-card>
   </div>
 
   <div class="metrics-grid">
@@ -67,6 +48,38 @@
         <p class="metric-label">Average per Order</p>
         <h3 class="metric-value">{{ vm.averagePerOrder | number:'1.2-2' }} ฿</h3>
       </div>
+    </mat-card>
+
+    <mat-card class="metric-card finance-card sales-card" [class.finance-card-profit]="vm.currentMonthProfit > 0" [class.finance-card-loss]="vm.currentMonthProfit < 0">
+      <div class="metric-icon" [class.metric-icon-profit]="vm.currentMonthProfit > 0" [class.metric-icon-loss]="vm.currentMonthProfit < 0" [class.metric-icon-average]="vm.currentMonthProfit === 0">
+        <mat-icon>{{ vm.currentMonthProfit >= 0 ? 'account_balance_wallet' : 'trending_down' }}</mat-icon>
+      </div>
+      <div class="metric-content finance-content">
+        <p class="metric-label">การเงินเดือน{{ vm.currentMonthLabel }}</p>
+        <p class="finance-line">Total Cost <strong>{{ vm.currentMonthCost | number:'1.2-2' }} ฿</strong></p>
+        <p class="finance-line" [class.finance-profit]="vm.currentMonthProfit > 0" [class.finance-loss]="vm.currentMonthProfit < 0">
+          Profit <strong>{{ vm.currentMonthProfit | number:'1.2-2' }} ฿</strong>
+        </p>
+      </div>
+    </mat-card>
+
+    <mat-card class="filter-card">
+      <mat-card-content>
+        <div class="filter-copy">
+          <span class="filter-label">ช่วงการวิเคราะห์</span>
+          <p>เลือกมุมมองรายวัน รายสัปดาห์ หรือรายเดือน</p>
+        </div>
+
+        <mat-button-toggle-group
+          [ngModel]="selectedRange"
+          (ngModelChange)="onRangeChange($event)"
+          aria-label="Time range filter"
+        >
+          <mat-button-toggle value="daily">Daily</mat-button-toggle>
+          <mat-button-toggle value="weekly">Weekly</mat-button-toggle>
+          <mat-button-toggle value="monthly">Monthly</mat-button-toggle>
+        </mat-button-toggle-group>
+      </mat-card-content>
     </mat-card>
   </div>
 

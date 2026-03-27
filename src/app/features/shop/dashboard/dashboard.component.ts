@@ -37,6 +37,10 @@ interface DashboardViewModel {
   totalOrders: number;
   topMenu: string;
   averagePerOrder: number;
+  currentMonthLabel: string;
+  currentMonthRevenue: number;
+  currentMonthCost: number;
+  currentMonthProfit: number;
   totalItems: number;
   lowStockItems: number;
   totalStock: number;
@@ -163,12 +167,18 @@ export class DashboardComponent implements OnInit {
     const menuBreakdown = this.groupSalesByMenu(safeSales);
     const totalRevenue = safeSales.reduce((sum, sale) => sum + sale.totalPrice, 0);
     const totalOrders = safeSales.length;
+    const currentMonthRevenue = this.getCurrentMonthRevenue(safeSales);
+    const currentMonthProfit = currentMonthRevenue - totalCost;
 
     return {
       totalRevenue,
       totalOrders,
       topMenu: menuBreakdown[0]?.menuName ?? '-',
       averagePerOrder: totalOrders > 0 ? totalRevenue / totalOrders : 0,
+      currentMonthLabel: this.getCurrentMonthLabel(),
+      currentMonthRevenue,
+      currentMonthCost: totalCost,
+      currentMonthProfit,
       totalItems: safeInventoryItems.length,
       lowStockItems: safeInventoryItems.filter((item) => item.quantity > 0 && item.quantity < 5).length,
       totalStock: safeInventoryItems.reduce((sum, item) => sum + Math.max(item.quantity, 0), 0),
@@ -324,6 +334,10 @@ export class DashboardComponent implements OnInit {
       totalOrders: 0,
       topMenu: '-',
       averagePerOrder: 0,
+      currentMonthLabel: this.getCurrentMonthLabel(),
+      currentMonthRevenue: 0,
+      currentMonthCost: 0,
+      currentMonthProfit: 0,
       totalItems: 0,
       lowStockItems: 0,
       totalStock: 0,
@@ -334,6 +348,23 @@ export class DashboardComponent implements OnInit {
       lineChartData: this.createLineChartData([]),
       barChartData: this.createBarChartData([])
     };
+  }
+
+  private getCurrentMonthRevenue(sales: Sale[]): number {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+
+    return sales
+      .filter((sale) => {
+        const saleDate = new Date(sale.date);
+        return saleDate.getMonth() === currentMonth && saleDate.getFullYear() === currentYear;
+      })
+      .reduce((sum, sale) => sum + sale.totalPrice, 0);
+  }
+
+  private getCurrentMonthLabel(): string {
+    return new Intl.DateTimeFormat('th-TH', { month: 'long' }).format(new Date());
   }
 
   private getCssColor(variableName: string, fallback: string): string {
