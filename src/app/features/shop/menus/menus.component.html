@@ -1,0 +1,122 @@
+<div class="menus-container">
+  <div class="page-header">
+    <h1 class="page-title">
+      <mat-icon class="title-icon">restaurant_menu</mat-icon>
+      จัดการเมนู
+    </h1>
+    <p class="page-subtitle">สร้าง แก้ไข และลบเมนู พร้อมเชื่อมวัตถุดิบจากคลัง</p>
+  </div>
+
+  <mat-card class="form-card">
+    <mat-card-content>
+      <form class="menu-form" [formGroup]="menuForm" (ngSubmit)="saveMenu()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ชื่อเมนู *</mat-label>
+          <input matInput formControlName="menuName" placeholder="เช่น ลาบหมู, ต้มแซ่บ">
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>ราคา *</mat-label>
+          <input matInput type="number" min="0.01" step="0.01" formControlName="price">
+        </mat-form-field>
+
+        <div class="ingredient-header">
+          <h3>วัตถุดิบ (Ingredients)</h3>
+          <button mat-stroked-button type="button" (click)="addIngredient()">
+            <mat-icon>add</mat-icon>
+            เพิ่มวัตถุดิบ
+          </button>
+        </div>
+
+        <div formArrayName="ingredients" class="ingredients-list" *ngIf="stockItems$ | async as stockItems">
+          <div class="ingredient-row" *ngFor="let group of ingredients.controls; let i = index" [formGroupName]="i">
+            <mat-form-field appearance="outline" class="full-width stock-select">
+              <mat-label>สินค้าในสต็อก *</mat-label>
+              <mat-select
+                formControlName="stockItemId"
+                (selectionChange)="onIngredientStockChange(i, $event.value, stockItems)"
+              >
+                <mat-option *ngFor="let item of stockItems" [value]="item.id">
+                  {{ item.name }} (คงเหลือ {{ item.quantity | number:'1.0-2' }} {{ item.unit }})
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="full-width qty-field">
+              <mat-label>ปริมาณต่อ 1 จาน (ไม่บังคับ)</mat-label>
+              <input matInput type="number" min="0.0001" step="0.01" formControlName="quantity" placeholder="เว้นว่าง = ไม่ตัดสต็อก">
+            </mat-form-field>
+
+            <button
+              mat-icon-button
+              type="button"
+              class="remove-btn"
+              (click)="removeIngredient(i)"
+              [disabled]="ingredients.length <= 1"
+              aria-label="remove ingredient"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+
+        <div class="button-group">
+          <button mat-raised-button color="primary" type="submit" [disabled]="menuForm.invalid">
+            <mat-icon>{{ editingMenuId ? 'save' : 'add_circle' }}</mat-icon>
+            {{ editingMenuId ? 'บันทึกการแก้ไข' : 'เพิ่มเมนู' }}
+          </button>
+          <button mat-stroked-button type="button" (click)="resetForm()">
+            <mat-icon>restart_alt</mat-icon>
+            ล้างฟอร์ม
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="table-card" *ngIf="menus$ | async as menus">
+    <mat-card-content>
+      <table mat-table [dataSource]="menus" class="menu-table">
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>ชื่อเมนู</th>
+          <td mat-cell *matCellDef="let menu">{{ menu.name }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="price">
+          <th mat-header-cell *matHeaderCellDef class="align-right">ราคา</th>
+          <td mat-cell *matCellDef="let menu" class="align-right">{{ menu.price | number:'1.2-2' }}</td>
+        </ng-container>
+
+        <ng-container matColumnDef="ingredients">
+          <th mat-header-cell *matHeaderCellDef>วัตถุดิบ</th>
+          <td mat-cell *matCellDef="let menu">
+            <div class="ingredient-chip" *ngFor="let ingredient of (menu.ingredients ?? [])">
+              {{ formatIngredient(ingredient) }}
+            </div>
+            <span *ngIf="(menu.ingredients ?? []).length === 0">-</span>
+          </td>
+        </ng-container>
+
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="align-right">จัดการ</th>
+          <td mat-cell *matCellDef="let menu" class="align-right actions-cell">
+            <button mat-icon-button type="button" (click)="editMenu(menu)" aria-label="edit menu">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button type="button" (click)="deleteMenu(menu)" aria-label="delete menu">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns" class="data-row"></tr>
+      </table>
+
+      <div class="empty-state" *ngIf="menus.length === 0">
+        <mat-icon>restaurant</mat-icon>
+        <p>ยังไม่มีเมนูในร้านนี้</p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

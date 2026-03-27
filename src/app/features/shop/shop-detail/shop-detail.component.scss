@@ -24,7 +24,7 @@
     padding: 12px !important;
     gap: 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    
+
     .logo-circle {
       width: 48px;
       height: 48px;
@@ -33,7 +33,19 @@
       color: var(--sidebar-bg, #8B1E14);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
       flex-shrink: 0;
-      
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+
+      .logo-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+
       .logo-icon {
         font-size: 28px;
         width: 28px;
@@ -105,7 +117,7 @@
         color: #ffffff !important;
         font-weight: 600;
         box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-        
+
         mat-icon {
           color: #ffffff;
         }
@@ -117,7 +129,7 @@
     position: absolute;
     bottom: 20px;
     width: 100%;
-    
+
     .footer-divider {
       border-color: rgba(255,255,255,0.2);
     }
@@ -128,7 +140,7 @@
       width: calc(100% - 32px);
       border-radius: 8px;
       transition: 0.2s;
-      
+
       &:hover {
         background-color: rgba(0,0,0,0.2);
         color: #ffffff !important;
@@ -153,11 +165,11 @@
   z-index: 1000;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-  
+
   .spacer {
     flex: 1 1 auto;
   }
-  
+
   .menu-btn, .action-btn, .theme-btn {
     color: var(--topbar-text, #2C2C2C);
     transition: color 0.3s ease;
@@ -166,7 +178,13 @@
       color: var(--accent-color, #F39C12);
     }
   }
-  
+
+  .theme-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   .user-btn {
     color: var(--accent-color, #F39C12);
   }
@@ -184,7 +202,7 @@
   height: calc(100vh - 64px);
   overflow-y: auto;
   background-color: var(--main-bg, #f4f6f8);
-  
+
   .content-card {
     background: transparent;
     color: var(--card-text, #333333);

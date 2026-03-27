@@ -1,34 +1,44 @@
 <mat-sidenav-container class="app-container" [ngClass]="currentTheme$ | async">
-  
+
   <!-- === Sidebar (Left Menu) === -->
   <mat-sidenav #sidenav mode="side" [opened]="isSidebarOpen" class="app-sidebar shadow">
-    <div class="sidebar-header d-flex align-items-center py-3 px-3">
-      <div class="logo-circle d-flex justify-content-center align-items-center" style="overflow: hidden; padding: 0; flex-shrink: 0;">
-        <img src="assets/kinlarb-logo.jpg" alt="Kinlarb Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+    <div class="sidebar-header">
+      <div class="logo-circle">
+        <img src="assets/kinlarb-logo.jpg" alt="Kinlarb Logo" class="logo-image">
       </div>
-      <div class="shop-info d-flex flex-column justify-content-center ms-3">
-        <h3 class="shop-name m-0">{{ currentShop?.name || 'Loading...' }}</h3>
+      <div class="shop-info">
+        <h3 class="shop-name">{{ currentShop?.name || 'Loading...' }}</h3>
         <small class="shop-subtitle">Management System</small>
       </div>
     </div>
 
     <mat-nav-list class="pt-2 custom-nav-list">
-      <a mat-list-item [routerLink]="['dashboard']" routerLinkActive="active-link" class="menu-item">
+      <a mat-list-item [routerLink]="['dashboard']" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
         <mat-icon matListItemIcon>dashboard</mat-icon>
         <div matListItemTitle>Dashboard</div>
       </a>
-      
-      <a mat-list-item [routerLink]="['stock-in']" routerLinkActive="active-link" class="menu-item">
+
+      <a mat-list-item [routerLink]="['menus']" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
+        <mat-icon matListItemIcon>restaurant_menu</mat-icon>
+        <div matListItemTitle>Menu Management</div>
+      </a>
+
+      <a mat-list-item [routerLink]="['sales']" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
+        <mat-icon matListItemIcon>point_of_sale</mat-icon>
+        <div matListItemTitle>Sales</div>
+      </a>
+
+      <a mat-list-item [routerLink]="['stock-in']" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
         <mat-icon matListItemIcon>move_to_inbox</mat-icon>
         <div matListItemTitle>Stock In (รับเข้า)</div>
       </a>
-      
-      <a mat-list-item [routerLink]="['stock-out']" routerLinkActive="active-link" class="menu-item">
+
+      <a mat-list-item [routerLink]="['stock-out']" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
         <mat-icon matListItemIcon>outbox</mat-icon>
         <div matListItemTitle>Stock Out (เบิกออก)</div>
       </a>
-      
-      <a mat-list-item [routerLink]="['history']" routerLinkActive="active-link" class="menu-item">
+
+      <a mat-list-item [routerLink]="['history']" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
         <mat-icon matListItemIcon>history</mat-icon>
         <div matListItemTitle>History (ประวัติ)</div>
       </a>
@@ -45,18 +55,19 @@
 
   <!-- === Main Content Area === -->
   <mat-sidenav-content class="app-content-wrapper bg-main">
-    
+
     <!-- Topbar (Header) -->
     <mat-toolbar class="app-topbar shadow-sm">
-      <button mat-icon-button (click)="toggleSidebar()" class="menu-btn" title="Toggle Sidebar">
+      <button mat-icon-button (click)="toggleSidebar()" class="menu-btn" title="Toggle Sidebar" aria-label="Toggle sidebar">
         <mat-icon>menu</mat-icon>
       </button>
-      
+
       <span class="spacer"></span>
-      
+
       <!-- Theme Switcher -->
-      <button mat-button [matMenuTriggerFor]="themeMenu" class="theme-btn me-2">
-        <mat-icon class="me-1">palette</mat-icon> Theme
+      <button mat-button [matMenuTriggerFor]="themeMenu" class="theme-btn">
+        <mat-icon>palette</mat-icon>
+        <span>Theme</span>
       </button>
       <mat-menu #themeMenu="matMenu">
         <button mat-menu-item (click)="changeTheme('kinlarb-theme')">
@@ -71,12 +82,12 @@
       </mat-menu>
 
       <!-- Placeholder: Search -->
-      <button mat-icon-button class="action-btn me-1">
+      <button mat-icon-button class="action-btn" aria-label="Search">
         <mat-icon>search</mat-icon>
       </button>
-      
+
       <!-- Placeholder: User Profile -->
-      <button mat-icon-button class="user-btn">
+      <button mat-icon-button class="user-btn" aria-label="User profile">
         <mat-icon>account_circle</mat-icon>
       </button>
     </mat-toolbar>
@@ -85,6 +96,6 @@
     <div class="content-area">
       <router-outlet></router-outlet>
     </div>
-    
+
   </mat-sidenav-content>
 </mat-sidenav-container>

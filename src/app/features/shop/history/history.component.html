@@ -64,7 +64,11 @@
             <mat-icon class="col-icon">numbers</mat-icon>
             จำนวน
           </th>
-          <td mat-cell *matCellDef="let element" class="align-right">{{ element.quantity }}</td>
+          <td mat-cell *matCellDef="let element" class="align-right">
+            <span [ngClass]="{ 'cost-in': element.type === 'IN', 'cost-out': element.type === 'OUT' }">
+              {{ element.type === 'IN' ? '+' : '-' }}{{ element.quantity | number:'1.0-2' }}
+            </span>
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="cost">
@@ -73,7 +77,9 @@
             มูลค่า
           </th>
           <td mat-cell *matCellDef="let element" class="align-right">
-            {{ (element.totalCost ?? element.cost ?? element.price) ? ((element.totalCost ?? element.cost ?? element.price) | number:'1.2-2') : '-' }}
+            <span [ngClass]="{ 'cost-in': element.type === 'IN', 'cost-out': element.type === 'OUT' }">
+              {{ (element.totalCost ?? element.cost ?? element.price) != null ? (element.type === 'IN' ? '+' : '-') + ((element.totalCost ?? element.cost ?? element.price) | number:'1.2-2') : '-' }}
+            </span>
           </td>
         </ng-container>
 

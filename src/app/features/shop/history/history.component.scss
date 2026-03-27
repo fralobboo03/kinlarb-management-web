@@ -115,6 +115,16 @@ $spacing-lg: 24px;
   }
 }
 
+.cost-in {
+  color: var(--success-color, #2E7D32);
+  font-weight: 600;
+}
+
+.cost-out {
+  color: var(--warn-color, #C62828);
+  font-weight: 600;
+}
+
 .empty-state {
   text-align: center;
   padding: $spacing-lg;

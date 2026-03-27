@@ -11,21 +11,29 @@ export const routes: Routes = [
     loadComponent: () => import('./features/shop/shop-detail/shop-detail.component').then(m => m.ShopDetailComponent),
     children: [
       { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      { 
-        path: 'dashboard', 
-        loadComponent: () => import('./features/shop/dashboard/dashboard.component').then(m => m.DashboardComponent) 
+      {
+        path: 'dashboard',
+        loadComponent: () => import('./features/shop/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
-      { 
-        path: 'stock-in', 
-        loadComponent: () => import('./features/shop/stock-in/stock-in.component').then(m => m.StockInComponent) 
+      {
+        path: 'stock-in',
+        loadComponent: () => import('./features/shop/stock-in/stock-in.component').then(m => m.StockInComponent)
       },
-      { 
-        path: 'stock-out', 
-        loadComponent: () => import('./features/shop/stock-out/stock-out.component').then(m => m.StockOutComponent) 
+      {
+        path: 'stock-out',
+        loadComponent: () => import('./features/shop/stock-out/stock-out.component').then(m => m.StockOutComponent)
       },
-      { 
-        path: 'history', 
-        loadComponent: () => import('./features/shop/history/history.component').then(m => m.HistoryComponent) 
+      {
+        path: 'menus',
+        loadComponent: () => import('./features/shop/menus/menus.component').then(m => m.MenusComponent)
+      },
+      {
+        path: 'sales',
+        loadComponent: () => import('./features/shop/sales/sales.component').then(m => m.SalesComponent)
+      },
+      {
+        path: 'history',
+        loadComponent: () => import('./features/shop/history/history.component').then(m => m.HistoryComponent)
       }
     ]
   },

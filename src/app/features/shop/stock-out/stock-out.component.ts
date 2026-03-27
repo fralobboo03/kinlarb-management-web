@@ -29,6 +29,7 @@ export class StockOutComponent implements OnInit {
   quantity = 1;
   price: number | undefined;
   savedStatus = false;
+  errorMessage = '';
   lastSavedName = '';
 
   currentStocks$!: Observable<{ name: string; quantity: number }[]>;
@@ -41,8 +42,15 @@ export class StockOutComponent implements OnInit {
   }
 
   saveStockOut(): void {
+    this.errorMessage = '';
+
     if (this.itemName && this.quantity > 0) {
-      this.stockService.addStockOut(this.shopId, this.itemName, this.quantity, this.price);
+      const success = this.stockService.addStockOut(this.shopId, this.itemName, this.quantity, this.price);
+      if (!success) {
+        this.errorMessage = 'สต็อกไม่เพียงพอ หรือชื่อสินค้าไม่ถูกต้อง';
+        return;
+      }
+
       this.lastSavedName = this.itemName;
 
       this.itemName = '';
@@ -59,6 +67,7 @@ export class StockOutComponent implements OnInit {
     this.quantity = 1;
     this.price = undefined;
     this.savedStatus = false;
+    this.errorMessage = '';
   }
 
   clearAllStock(): void {
