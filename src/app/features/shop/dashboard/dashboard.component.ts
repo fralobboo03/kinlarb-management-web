@@ -4,10 +4,14 @@ import { ActivatedRoute } from '@angular/router';
 import { StockService } from '../services/stock.service';
 import { Observable } from 'rxjs';
 
+// Angular Material Components
+import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, MatCardModule, MatIconModule],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss'
 })

@@ -5,10 +5,18 @@ import { ActivatedRoute } from '@angular/router';
 import { StockService } from '../services/stock.service';
 import { Observable } from 'rxjs';
 
+// Angular Material Components
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatListModule } from '@angular/material/list';
+
 @Component({
   selector: 'app-stock-out',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule, MatListModule],
   templateUrl: './stock-out.component.html',
   styleUrl: './stock-out.component.scss'
 })
@@ -44,5 +52,12 @@ export class StockOutComponent implements OnInit {
       this.savedStatus = true;
       setTimeout(() => this.savedStatus = false, 3000);
     }
+  }
+
+  resetForm() {
+    this.itemName = '';
+    this.quantity = 1;
+    this.price = undefined;
+    this.savedStatus = false;
   }
 }

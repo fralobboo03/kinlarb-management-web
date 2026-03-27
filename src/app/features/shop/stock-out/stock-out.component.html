@@ -1,40 +1,91 @@
-<div>
-  <h3 class="mb-4">📤 เบิกของออก (Stock Out)</h3>
-  <div class="row">
-    <div class="col-md-6">
-      <div class="form-group mb-3">
-        <label class="form-label fw-bold">ชื่อสินค้าที่จะเบิก</label>
-        <input type="text" class="form-control" [(ngModel)]="itemName" placeholder="คีย์ชื่อสินค้าให้ตรง เพื่อตัดสต๊อก">
-      </div>
-      <div class="form-group mb-4">
-        <label class="form-label fw-bold">จำนวนที่จะเบิก</label>
-        <input type="number" class="form-control" [(ngModel)]="quantity" min="1">
-      </div>
-      <div class="mb-4">
-      <label class="form-label fw-bold">ยอดขายรวม (ใส่เพื่อคำนวณรายได้/กำไร)</label>
-      <input type="number" class="form-control" [(ngModel)]="price" min="0" placeholder="เช่น 250">
-    </div>
-    <button class="btn btn-warning px-4" (click)="saveStockOut()" [disabled]="!itemName || quantity <= 0">
-         ✂️ บันทึกการเบิกขาย
-      </button>
-      
-      <div class="alert alert-success mt-4 shadow-sm" *ngIf="savedStatus">
-        เบิกรายการ <strong>{{ lastSavedName }}</strong> ลงระบบแล้ว!
-      </div>
-    </div>
-    
-    <!-- รายการสินค้าไกด์ไลน์ (ช่วยให้จำได้ว่ามีสินค้าชื่ออะไรบ้าง) -->
-    <div class="col-md-5 offset-md-1 d-none d-md-block">
-      <div class="card bg-light">
-        <div class="card-body">
-          <h6 class="card-title text-muted">สินค้าในคลังปัจจุบัน</h6>
-          <ul class="list-unstyled mb-0">
-            <li *ngFor="let item of currentStocks$ | async" class="mb-1" style="cursor: pointer;" (click)="itemName = item.name">
-              <span class="badge bg-secondary me-2">{{ item.quantity }}</span> {{ item.name }}
-            </li>
-          </ul>
+<div class="stock-out-container">
+  <div class="content-wrapper">
+    <!-- Form Card -->
+    <mat-card class="form-card">
+      <!-- Header Section -->
+      <mat-card-header>
+        <div class="header-content">
+          <h2 class="form-title">
+            <mat-icon class="title-icon">outbox</mat-icon>
+            เบิกของออก (Stock Out)
+          </h2>
+          <p class="form-subtitle">บันทึกการเบิกสินค้าเพื่อขายหรือใช้งาน</p>
+        </div>
+      </mat-card-header>
+
+      <!-- Form Content -->
+      <mat-card-content>
+        <form class="stock-out-form" (ngSubmit)="saveStockOut()">
+          <!-- Item Name Field -->
+          <mat-form-field class="full-width">
+            <mat-label>ชื่อสินค้าที่จะเบิก *</mat-label>
+            <input matInput [(ngModel)]="itemName" name="itemName" placeholder="คีย์ชื่อสินค้าให้ตรง" required>
+            <mat-icon matSuffix>inventory</mat-icon>
+          </mat-form-field>
+
+          <!-- Quantity Field -->
+          <mat-form-field class="full-width">
+            <mat-label>จำนวนที่จะเบิก *</mat-label>
+            <input matInput type="number" [(ngModel)]="quantity" name="quantity" min="1" required>
+            <mat-icon matSuffix>numbers</mat-icon>
+          </mat-form-field>
+
+          <!-- Price Field -->
+          <mat-form-field class="full-width">
+            <mat-label>ยอดขายรวม</mat-label>
+            <input matInput type="number" [(ngModel)]="price" name="price" min="0" placeholder="ใส่เพื่อคำนวณรายได้">
+            <mat-icon matSuffix>local_offer</mat-icon>
+          </mat-form-field>
+
+          <!-- Action Buttons -->
+          <div class="button-group">
+            <button mat-raised-button color="primary" type="submit" [disabled]="!itemName || quantity <= 0" class="btn-save">
+              <mat-icon>check_circle</mat-icon>
+              บันทึกการเบิก
+            </button>
+            <button mat-stroked-button type="button" (click)="resetForm()" class="btn-reset">
+              <mat-icon>refresh</mat-icon>
+              ล้างฟอร์ม
+            </button>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Success Message -->
+    <mat-card class="success-message alert-card" *ngIf="savedStatus">
+      <div class="alert-content">
+        <mat-icon class="alert-icon">check_circle</mat-icon>
+        <div>
+          <p class="alert-title">บันทึกสำเร็จ</p>
+          <p class="alert-message">เบิกรายการ <strong>{{ lastSavedName }}</strong> ลงระบบแล้ว!</p>
         </div>
       </div>
-    </div>
+    </mat-card>
   </div>
+
+  <!-- Stock Reference Panel -->
+  <mat-card class="reference-card">
+    <mat-card-header>
+      <h3 class="ref-title">
+        <mat-icon>inventory_2</mat-icon>
+        สินค้าในคลังปัจจุบัน
+      </h3>
+    </mat-card-header>
+    <mat-card-content class="ref-content">
+      <mat-list class="stock-list">
+        <mat-list-item *ngFor="let item of currentStocks$ | async; let last = last" [class.last]="last" 
+                       (click)="itemName = item.name" class="stock-item">
+          <div matListItemTitle class="item-name">{{ item.name }}</div>
+          <div matListItemLine class="item-qty">
+            <span class="qty-badge">{{ item.quantity }}</span> ชิ้น
+          </div>
+        </mat-list-item>
+        <div *ngIf="!(currentStocks$ | async)?.length" class="empty-state">
+          <mat-icon>inbox</mat-icon>
+          <p>ยังไม่มีสินค้าในคลัง</p>
+        </div>
+      </mat-list>
+    </mat-card-content>
+  </mat-card>
 </div>

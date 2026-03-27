@@ -1,36 +1,87 @@
-<div>
-  <h3 class="mb-4">🕒 ประวัติการทำรายการ (Transaction History)</h3>
-  <div class="card shadow-sm border-0">
-    <div class="table-responsive">
-      <table class="table table-hover mb-0">
-        <thead class="table-light">
-          <tr>
-            <th class="py-3 px-4">วันที่ - เวลา</th>
-            <th class="py-3">ประเภท</th>
-            <th class="py-3">สินค้า</th>
-            <th class="py-3">จำนวน</th>
-            <th class="py-3">ต้นทุน</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let tx of history$ | async">
-            <td class="px-4">{{ tx.date | date:'dd/MM/yyyy HH:mm:ss' }}</td>
-            <td>
-              <span class="badge rounded-pill" [ngClass]="tx.type === 'IN' ? 'bg-success' : 'bg-warning text-dark'">
-                {{ tx.type === 'IN' ? 'รับเข้า' : 'เบิกออก' }}
-              </span>
-            </td>
-            <td class="fw-bold">{{ tx.name }}</td>
-            <td>{{ tx.quantity }}</td>
-            <td>{{ tx.cost ? (tx.cost | number:'1.2-2') : '-' }}</td>
-          </tr>
-          <tr *ngIf="(history$ | async)?.length === 0">
-            <td colspan="5" class="text-center py-5 text-muted">
-              ยังไม่มีประวัติการทำรายการ
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+<div class="history-container">
+  <!-- Header Section -->
+  <div class="history-header">
+    <h1 class="history-title">
+      <mat-icon class="title-icon">history</mat-icon>
+      ประวัติการทำรายการ
+    </h1>
+    <p class="history-subtitle">แสดงรายละเอียดของกิจการปิดค้างสินค้าที่ได้คสฟงขอ</p>
   </div>
+
+  <!-- Table Card -->
+  <mat-card class="table-card">
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="history$ | async" class="history-table">
+        <!-- Date Column -->
+        <ng-container matColumnDef="date">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-icon class="col-icon">calendar_today</mat-icon>
+            วันที่ - เวลา
+          </th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.date | date:'dd/MM/yyyy HH:mm:ss' }}
+          </td>
+        </ng-container>
+
+        <!-- Type Column -->
+        <ng-container matColumnDef="type">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-icon class="col-icon">assignment</mat-icon>
+            ประเภท
+          </th>
+          <td mat-cell *matCellDef="let element">
+            <span class="badge" [class.badge-in]="element.type === 'IN'" [class.badge-out]="element.type === 'OUT'">
+              {{ element.type === 'IN' ? 'รับเข้า' : 'เบิกออก' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-icon class="col-icon">inventory_2</mat-icon>
+            ชื่อสินค้า
+          </th>
+          <td mat-cell *matCellDef="let element">
+            <strong>{{ element.name }}</strong>
+          </td>
+        </ng-container>
+
+        <!-- Quantity Column -->
+        <ng-container matColumnDef="quantity">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-icon class="col-icon">numbers</mat-icon>
+            จำนวน
+          </th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.quantity }}
+          </td>
+        </ng-container>
+
+        <!-- Cost Column -->
+        <ng-container matColumnDef="cost">
+          <th mat-header-cell *matHeaderCellDef>
+            <mat-icon class="col-icon">attach_money</mat-icon>
+            ต้นทุน
+          </th>
+          <td mat-cell *matCellDef="let element">
+            {{ element.cost ? (element.cost | number:'1.2-2') : '-' }}
+          </td>
+        </ng-container>
+
+        <!-- Header Row -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+
+        <!-- Data Rows -->
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+      </table>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="!(history$ | async)?.length">
+        <mat-icon class="empty-icon">event_note</mat-icon>
+        <p class="empty-title">ยังไม่มีประวัติ</p>
+        <p class="empty-text">กรุณาทำรายการคนุ่เพื่อสามารถเบิ่มประวัติ</p>
+      </div>
+    </div>
+  </mat-card>
 </div>
