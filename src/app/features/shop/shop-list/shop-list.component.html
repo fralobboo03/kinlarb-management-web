@@ -1,57 +1,109 @@
 <div class="shop-list-container">
-  <div class="header-section text-center py-5">
-    <h1 class="display-5 fw-bold" style="color: var(--primary-color);">🏢 เลือกร้านค้าของคุณ</h1>
-    <p class="text-muted fs-5">ระบบจัดการร้านอาหารอัจฉริยะ (Multi-Shop Management)</p>
+  <!-- Header Section -->
+  <div class="list-header">
+    <div class="header-content">
+      <h1 class="page-title">
+        <mat-icon class="title-icon">storefront</mat-icon>
+        ร้านค้าทั้งหมด
+      </h1>
+      <p class="page-subtitle">จัดการข้อมูลร้านค้าของคุณ</p>
+    </div>
+    <button mat-raised-button color="primary" (click)="addShop()" class="add-shop-btn">
+      <mat-icon>add_circle</mat-icon>
+      เพิ่มร้านใหม่
+    </button>
   </div>
-  
-  <div class="container pb-5">
-    <div class="row justify-content-center g-4">
-      <div class="col-12 col-md-6 col-lg-5" *ngFor="let shop of shopsWithSummary$ | async">
-        <!-- Shop Card -->
-        <mat-card class="shop-card h-100 shadow-sm" [routerLink]="['/shops', shop.id]" matRipple>
-          <div class="card-status-strip"></div>
-          
-          <mat-card-header class="pt-4 pb-2 px-4">
-            <div mat-card-avatar class="shop-avatar d-flex justify-content-center align-items-center">
-              <mat-icon>storefront</mat-icon>
-            </div>
-            <mat-card-title class="fs-4 fw-bold mb-1" style="color: var(--card-text);">{{ shop.name }}</mat-card-title>
-            <mat-card-subtitle>สถานะ: <span class="text-success fw-bold">เปิดทำการ</span></mat-card-subtitle>
-          </mat-card-header>
 
-          <mat-card-content class="px-4">
-            <mat-divider class="my-3"></mat-divider>
-            
-            <h6 class="text-muted mb-3 mt-2">
-              <mat-icon inline style="vertical-align: middle;" class="me-1">date_range</mat-icon>
-              สรุปผลประกอบการ (ช่วงเดือนนี้)
-            </h6>
-            
-            <!-- Summary Section -->
-            <div *ngIf="shop.summary$ | async as summary; else loading" class="summary-grid">
-              <div class="summary-item cost">
-                <span class="label">🔴 ทุนรวมที่ลงไป</span>
-                <span class="value">{{ summary.cost | number:'1.2-2' }} ฿</span>
-              </div>
-              <div class="summary-item profit mt-3">
-                <span class="label">⭐ กำไร/ขาดทุน</span>
-                <span class="value" [ngClass]=" summary.profit >= 0 ? 'text-success' : 'text-danger' ">
-                  {{ summary.profit > 0 ? '+' : '' }}{{ summary.profit | number:'1.2-2' }} ฿
-                </span>
-              </div>
-            </div>
-            <ng-template #loading>
-              <div class="text-center text-muted py-3">กำลังเริ่มคำนวณข้อมูล...</div>
-            </ng-template>
-          </mat-card-content>
+  <!-- Main Table Card -->
+  <mat-card class="shops-card">
+    <div class="table-container" *ngIf="shopsWithSummary$ | async as shops">
+      <table mat-table [dataSource]="shops" class="shops-table">
+        <!-- Shop Name Column -->
+        <ng-container matColumnDef="name">
+          <th mat-header-cell *matHeaderCellDef class="col-name">
+            <mat-icon class="col-icon">inventory_2</mat-icon>
+            <span>ชื่อร้าน</span>
+          </th>
+          <td mat-cell *matCellDef="let shop" class="col-name">
+            <strong>{{ shop.name }}</strong>
+          </td>
+        </ng-container>
 
-          <mat-card-actions class="px-4 pb-4 pt-0 d-flex justify-content-end">
-            <button mat-flat-button color="primary" class="enter-btn px-4 py-2">
-              เข้าสู่ระบบร้าน <mat-icon iconPositionEnd>arrow_forward</mat-icon>
-            </button>
-          </mat-card-actions>
-        </mat-card>
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef class="col-status">
+            <mat-icon class="col-icon">check_circle</mat-icon>
+            <span>สถานะ</span>
+          </th>
+          <td mat-cell *matCellDef="let shop" class="col-status">
+            <span class="status-badge active">
+              <mat-icon class="status-icon">circle</mat-icon>
+              เปิดทำการ
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Revenue Column -->
+        <ng-container matColumnDef="revenue">
+          <th mat-header-cell *matHeaderCellDef class="col-revenue">
+            <mat-icon class="col-icon">trending_up</mat-icon>
+            <span>รายรับเดือนนี้</span>
+          </th>
+          <td mat-cell *matCellDef="let shop" class="col-revenue">
+            <span class="profit-value" [class.positive]="shop.summary.profit >= 0">
+              {{ shop.summary.profit > 0 ? '+' : '' }}{{ shop.summary.profit | number:'1.2-2' }} ฿
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="col-actions">
+            <mat-icon class="col-icon">settings</mat-icon>
+            <span>ปฏิบัติการ</span>
+          </th>
+          <td mat-cell *matCellDef="let shop" class="col-actions">
+            <div class="action-buttons">
+              <button
+                mat-icon-button
+                [routerLink]="['/shops', shop.id]"
+                matTooltip="เข้าสู่ระบบ"
+                class="btn-enter">
+                <mat-icon>login</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                (click)="editShop(shop)"
+                matTooltip="แก้ไข"
+                class="btn-edit">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                (click)="deleteShop(shop)"
+                matTooltip="ลบ"
+                class="btn-delete">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Header and Data Rows -->
+        <tr mat-header-row *matHeaderRowDef="displayedColumns" class="header-row"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" class="data-row"></tr>
+      </table>
+
+      <!-- Empty State -->
+      <div class="empty-state" *ngIf="shops.length === 0">
+        <mat-icon class="empty-icon">store</mat-icon>
+        <p class="empty-title">ยังไม่มีร้านค้า</p>
+        <p class="empty-text">เพิ่มร้านใหม่เพื่อเริ่มใช้งาน</p>
+        <button mat-raised-button color="primary" (click)="addShop()">
+          <mat-icon>add</mat-icon>
+          สร้างร้านใหม่
+        </button>
       </div>
     </div>
-  </div>
+  </mat-card>
 </div>

@@ -51,4 +51,16 @@ export class ShopService {
   getShopById(id: number): Shop | undefined {
     return this.getShops().find(s => s.id === id);
   }
+
+  addShop(name: string): void {
+    const shops = this.getShops();
+    const newId = Math.max(...shops.map(s => s.id), 0) + 1;
+    const newShop: Shop = { id: newId, name };
+    this.saveShops([...shops, newShop]);
+  }
+
+  deleteShop(id: number): void {
+    const shops = this.getShops().filter(s => s.id !== id);
+    this.saveShops(shops);
+  }
 }

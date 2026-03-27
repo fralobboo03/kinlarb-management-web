@@ -1,82 +1,381 @@
+// Spacing Variables
+$spacing-xs: 8px;
+$spacing-sm: 12px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+$spacing-xl: 32px;
+
+// Container
 .shop-list-container {
-  background-color: var(--main-bg, #f4f6f8);
-  min-height: 100vh;
   width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: $spacing-lg;
+  min-height: 100vh;
+  background-color: var(--main-bg, #f4f6f8);
+
+  @media (max-width: 768px) {
+    padding: $spacing-md;
+  }
+
+  @media (max-width: 480px) {
+    padding: $spacing-sm;
+  }
 }
 
-.shop-card {
-  border-radius: 16px !important;
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
-  position: relative;
-  border: 1px solid var(--border-color, #eaeaea) !important;
-  background-color: var(--card-bg, #ffffff) !important;
-  
-  &:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
-    
-    .enter-btn {
-      background-color: var(--accent-color, #F39C12) !important;
-    }
-  }
-  
-  .card-status-strip {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 6px;
-    background: linear-gradient(90deg, var(--primary-color, #8B1E14), var(--accent-color, #F39C12));
-  }
+// Header Section
+.list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
 
-  .shop-avatar {
-    background-color: rgba(243, 156, 18, 0.1);
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: $spacing-md;
+  }
+}
+
+.header-content {
+  flex: 1;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary-color, #8B1E14);
+  margin: 0 0 $spacing-sm 0;
+  line-height: 1.2;
+
+  .title-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
     color: var(--accent-color, #F39C12);
-    width: 50px;
-    height: 50px;
-    border-radius: 12px;
-    margin-right: 16px;
-    
-    mat-icon {
-      font-size: 28px;
-      height: 28px;
-      width: 28px;
-    }
-  }
-  
-  .summary-grid {
-    background-color: rgba(0,0,0,0.03);
-    border-radius: 12px;
-    padding: 16px;
-    
-    .summary-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      
-      .label {
-        font-size: 0.95rem;
-        color: var(--card-text, #555);
-        opacity: 0.8;
-      }
-      .value {
-        font-size: 1.15rem;
-        font-weight: 700;
-        color: var(--card-text, #333);
-      }
-    }
-  }
-  
-  .enter-btn {
-    background-color: var(--primary-color, #8B1E14) !important;
-    border-radius: 8px !important;
-    transition: background-color 0.3s ease;
-    color: #fff !important;
   }
 }
 
-::ng-deep body.dark-theme .shop-card .summary-grid {
-  background-color: rgba(255,255,255,0.05);
+.page-subtitle {
+  font-size: 14px;
+  color: var(--card-text, #666666);
+  margin: 0;
+  font-weight: 400;
+  opacity: 0.8;
+}
+
+.add-shop-btn {
+  display: flex !important;
+  align-items: center;
+  gap: $spacing-sm;
+  padding: 8px 16px !important;
+  height: auto;
+  white-space: nowrap;
+
+  @media (max-width: 768px) {
+    align-self: flex-start;
+  }
+}
+
+// Table Card
+.shops-card {
+  background: var(--card-bg, #ffffff);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 1px solid var(--border-color, #eaeaea);
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  }
+}
+
+// Table Wrapper
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.shops-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  .header-row {
+    background-color: rgba(0, 0, 0, 0.02);
+    border-bottom: 2px solid var(--border-color, #eaeaea);
+  }
+
+  th {
+    padding: $spacing-md !important;
+    text-align: left;
+    font-weight: 600;
+    color: var(--card-text, #333333);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    display: table-cell;
+
+    .col-icon {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+      opacity: 0.6;
+      margin-right: $spacing-sm;
+      vertical-align: middle;
+    }
+
+    span {
+      vertical-align: middle;
+    }
+  }
+
+  td {
+    padding: $spacing-md !important;
+    border-bottom: 1px solid var(--border-color, #eaeaea);
+    color: var(--card-text, #333333);
+    display: table-cell;
+  }
+
+  .data-row {
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    &:last-child td {
+      border-bottom: none;
+    }
+  }
+}
+
+// Column Styles
+.col-name {
+  width: 25%;
+  min-width: 150px;
+}
+
+.col-status {
+  width: 20%;
+  min-width: 120px;
+}
+
+.col-revenue {
+  width: 25%;
+  min-width: 150px;
+}
+
+.col-actions {
+  width: 30%;
+  min-width: 150px;
+  text-align: right;
+}
+
+// Status Badge
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+
+  .status-icon {
+    width: 8px;
+    height: 8px;
+    font-size: 8px;
+  }
+
+  &.active {
+    background-color: #E8F5E9;
+    color: #2E7D32;
+  }
+
+  &.inactive {
+    background-color: #FFEBEE;
+    color: #C62828;
+  }
+}
+
+// Profit Value
+.profit-value {
+  font-weight: 600;
+  font-size: 14px;
+
+  &.positive {
+    color: #2E7D32;
+  }
+
+  &.negative {
+    color: #C62828;
+  }
+}
+
+.loading-text {
+  font-size: 12px;
+  color: var(--card-text, #999999);
+  opacity: 0.7;
+}
+
+// Action Buttons
+.action-buttons {
+  display: flex;
+  gap: $spacing-xs;
+  justify-content: flex-end;
+  align-items: center;
+
+  button {
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  .btn-enter {
+    color: var(--primary-color, #8B1E14) !important;
+
+    &:hover {
+      background-color: rgba(139, 30, 20, 0.1) !important;
+    }
+  }
+
+  .btn-edit {
+    color: #fff !important;
+    background-color: var(--accent-color, #F39C12) !important;
+
+    &:hover {
+      background-color: #f0a500 !important;
+    }
+  }
+
+  .btn-delete {
+    color: #fff !important;
+    background-color: #ff6b6b !important;
+
+    &:hover {
+      background-color: #ff5252 !important;
+    }
+  }
+}
+
+// Empty State
+.empty-state {
+  text-align: center;
+  padding: $spacing-xl;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-md;
+  color: var(--card-text, #999999);
+
+  .empty-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    opacity: 0.2;
+    color: var(--primary-color, #8B1E14);
+  }
+
+  .empty-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--card-text, #666666);
+    margin: 0;
+  }
+
+  .empty-text {
+    font-size: 14px;
+    color: var(--card-text, #999999);
+    margin: 0;
+  }
+}
+
+// Responsive Design
+@media (max-width: 1024px) {
+  .col-name {
+    width: 30%;
+  }
+
+  .col-revenue {
+    width: 30%;
+  }
+
+  .col-status,
+  .col-actions {
+    width: 20%;
+  }
+}
+
+@media (max-width: 768px) {
+  .shops-table {
+    font-size: 13px;
+
+    th,
+    td {
+      padding: $spacing-sm !important;
+    }
+
+    .col-icon {
+      display: none !important;
+    }
+  }
+
+  .col-name {
+    min-width: 100px;
+  }
+
+  .col-status {
+    min-width: 100px;
+  }
+
+  .col-revenue {
+    min-width: 120px;
+  }
+
+  .col-actions {
+    min-width: 100px;
+  }
+
+  .action-buttons button {
+    padding: 6px !important;
+
+    mat-icon {
+      font-size: 18px !important;
+      width: 18px !important;
+      height: 18px !important;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .shops-table {
+    font-size: 12px;
+
+    th,
+    td {
+      padding: $spacing-xs !important;
+    }
+  }
+
+  .col-name {
+    width: 40% !important;
+    min-width: 80px;
+  }
+
+  .col-status,
+  .col-revenue {
+    display: none;
+  }
+
+  .col-actions {
+    width: 60% !important;
+  }
 }
