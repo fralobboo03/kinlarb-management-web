@@ -14,24 +14,18 @@ export class ShopService {
 
   constructor(@Inject(PLATFORM_ID) platformId: Object) {
     this.isBrowser = isPlatformBrowser(platformId);
-    
+
+    const defaultShops = [
+      { id: 1, name: 'KIN LARB' },
+      { id: 2, name: 'KIN SMOOTH' }
+    ];
+
     if (this.isBrowser) {
-      let shops = this.loadShops();
-      if (shops.length === 0) {
-        shops = [
-          { id: 1, name: 'ร้านลาบ' },
-          { id: 2, name: 'ร้านน้ำ' }
-        ];
-        this.saveShops(shops);
-      } else {
-        this.shopsSubject.next(shops);
-      }
+      // Always initialize with default shops and save to localStorage
+      this.saveShops(defaultShops);
     } else {
       // Default for SSR
-      this.shopsSubject.next([
-        { id: 1, name: 'ร้านลาบ' },
-        { id: 2, name: 'ร้านน้ำ' }
-      ]);
+      this.shopsSubject.next(defaultShops);
     }
   }
 

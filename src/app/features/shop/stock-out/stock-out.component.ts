@@ -12,6 +12,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatListModule } from '@angular/material/list';
+import { MatDialog } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-stock-out',
@@ -23,14 +24,15 @@ import { MatListModule } from '@angular/material/list';
 export class StockOutComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private stockService = inject(StockService);
-  
+  private dialog = inject(MatDialog);
+
   shopId!: number;
   itemName = '';
   quantity = 1;
   price: number | undefined;
   savedStatus = false;
   lastSavedName = '';
-  
+
   currentStocks$!: Observable<{name: string, quantity: number}[]>;
 
   ngOnInit() {
@@ -44,11 +46,11 @@ export class StockOutComponent implements OnInit {
     if (this.itemName && this.quantity > 0) {
       this.stockService.addStockOut(this.shopId, this.itemName, this.quantity, this.price);
       this.lastSavedName = this.itemName;
-      
+
       this.itemName = '';
       this.quantity = 1;
       this.price = undefined;
-      
+
       this.savedStatus = true;
       setTimeout(() => this.savedStatus = false, 3000);
     }
@@ -59,5 +61,13 @@ export class StockOutComponent implements OnInit {
     this.quantity = 1;
     this.price = undefined;
     this.savedStatus = false;
+  }
+
+  clearAllStock() {
+    if (confirm('⚠️ คุณแน่ใจหรือว่าต้องการลบสินค้าทั้งหมด? การกระทำนี้ไม่สามารถย้อนกลับได้')) {
+      this.stockService.clearAllStock(this.shopId);
+      this.savedStatus = false;
+      alert('✓ ลบข้อมูลสินค้าทั้งหมดสำเร็จ!');
+    }
   }
 }

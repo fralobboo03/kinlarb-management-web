@@ -173,6 +173,21 @@ mat-icon[matSuffix] {
   color: white !important;
 }
 
+.btn-clear-all {
+  border-color: #ff6b6b !important;
+  color: #ff6b6b !important;
+
+  &:hover:not(:disabled) {
+    background-color: rgba(255, 107, 107, 0.08);
+    border-color: #ff5252 !important;
+    color: #ff5252 !important;
+  }
+
+  &:active:not(:disabled) {
+    background-color: rgba(255, 107, 107, 0.12);
+  }
+}
+
 .btn-reset {
   border-color: var(--accent-color, #F39C12) !important;
   color: var(--accent-color, #F39C12) !important;

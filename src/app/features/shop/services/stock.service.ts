@@ -68,7 +68,7 @@ export class StockService {
       map(txs => {
         const shopTxs = txs.filter(tx => tx.shopId === shopId);
         const stockMap = new Map<string, number>();
-        
+
         shopTxs.forEach(tx => {
           const current = stockMap.get(tx.name) || 0;
           if (tx.type === 'IN') {
@@ -77,7 +77,7 @@ export class StockService {
             stockMap.set(tx.name, current - tx.quantity);
           }
         });
-        
+
         return Array.from(stockMap.entries()).map(([name, quantity]) => ({ name, quantity }));
       })
     );
@@ -88,10 +88,10 @@ export class StockService {
       map(txs => {
         const now = new Date();
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-        
+
         let cost = 0;
         let revenue = 0;
-        
+
         txs.forEach(tx => {
           if (tx.shopId === shopId) {
             const txDate = new Date(tx.date);
@@ -104,9 +104,15 @@ export class StockService {
             }
           }
         });
-        
+
         return { cost, revenue, profit: revenue - cost };
       })
     );
+  }
+
+  clearAllStock(shopId: number): void {
+    const transactions = this.transactionsSubject.getValue();
+    const filteredTransactions = transactions.filter(tx => tx.shopId !== shopId);
+    this.saveTransactions(filteredTransactions);
   }
 }

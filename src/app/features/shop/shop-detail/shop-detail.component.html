@@ -2,12 +2,14 @@
   
   <!-- === Sidebar (Left Menu) === -->
   <mat-sidenav #sidenav mode="side" [opened]="isSidebarOpen" class="app-sidebar shadow">
-    <div class="sidebar-header d-flex flex-column align-items-center py-4">
-      <div class="logo-circle mb-3 shadow-sm d-flex justify-content-center align-items-center" style="overflow: hidden; padding: 0;">
+    <div class="sidebar-header d-flex align-items-center py-3 px-3">
+      <div class="logo-circle d-flex justify-content-center align-items-center" style="overflow: hidden; padding: 0; flex-shrink: 0;">
         <img src="assets/kinlarb-logo.jpg" alt="Kinlarb Logo" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
       </div>
-      <h3 class="shop-name m-0">{{ currentShop?.name || 'Loading...' }}</h3>
-      <small class="shop-subtitle">Management System</small>
+      <div class="shop-info d-flex flex-column justify-content-center ms-3">
+        <h3 class="shop-name m-0">{{ currentShop?.name || 'Loading...' }}</h3>
+        <small class="shop-subtitle">Management System</small>
+      </div>
     </div>
 
     <mat-nav-list class="pt-2 custom-nav-list">

@@ -19,8 +19,8 @@ import { Observable } from 'rxjs';
   selector: 'app-shop-detail',
   standalone: true,
   imports: [
-    CommonModule, 
-    RouterOutlet, 
+    CommonModule,
+    RouterOutlet,
     RouterModule,
     MatSidenavModule,
     MatToolbarModule,
@@ -36,18 +36,19 @@ export class ShopDetailComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private shopService = inject(ShopService);
   public themeService = inject(ThemeService);
-  
+
   currentShop: Shop | undefined;
   isSidebarOpen = true; // Sidebar always visible initially
   currentTheme$!: Observable<Theme>;
 
   ngOnInit() {
     this.currentTheme$ = this.themeService.theme$;
-    
+
     this.route.paramMap.subscribe(params => {
       const shopId = Number(params.get('shopId'));
       if (shopId) {
         this.currentShop = this.shopService.getShopById(shopId);
+        console.log('Current Shop:', this.currentShop);
       }
     });
   }

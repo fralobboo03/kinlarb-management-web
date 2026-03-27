@@ -47,6 +47,10 @@
               <mat-icon>refresh</mat-icon>
               ล้างฟอร์ม
             </button>
+            <button mat-stroked-button type="button" (click)="clearAllStock()" class="btn-clear-all">
+              <mat-icon>delete_sweep</mat-icon>
+              ลบสินค้าทั้งหมด
+            </button>
           </div>
         </form>
       </mat-card-content>
@@ -74,7 +78,7 @@
     </mat-card-header>
     <mat-card-content class="ref-content">
       <mat-list class="stock-list">
-        <mat-list-item *ngFor="let item of currentStocks$ | async; let last = last" [class.last]="last" 
+        <mat-list-item *ngFor="let item of currentStocks$ | async; let last = last" [class.last]="last"
                        (click)="itemName = item.name" class="stock-item">
           <div matListItemTitle class="item-name">{{ item.name }}</div>
           <div matListItemLine class="item-qty">

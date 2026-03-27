@@ -19,31 +19,60 @@
 
   .sidebar-header {
     background: linear-gradient(135deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0) 100%);
+    display: flex;
+    align-items: center;
+    padding: 12px !important;
+    gap: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     
     .logo-circle {
-      width: 70px;
-      height: 70px;
+      width: 48px;
+      height: 48px;
       background: #ffffff;
       border-radius: 50%;
       color: var(--sidebar-bg, #8B1E14);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      flex-shrink: 0;
       
       .logo-icon {
-        font-size: 38px;
-        width: 38px;
-        height: 38px;
+        font-size: 28px;
+        width: 28px;
+        height: 28px;
       }
     }
-    .shop-name {
-      font-weight: 700;
-      color: var(--sidebar-text, #F5F5F5);
-      letter-spacing: 0.5px;
-    }
-    .shop-subtitle {
-      color: var(--sidebar-accent, #F39C12);
-      opacity: 0.9;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
+
+    .shop-info {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      min-width: 0; // Allow text truncation
+      flex: 1;
+
+      .shop-name {
+        font-weight: 700;
+        color: var(--sidebar-text, #F5F5F5);
+        letter-spacing: 0.5px;
+        font-size: 14px;
+        line-height: 1.2;
+        margin: 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .shop-subtitle {
+        color: var(--sidebar-accent, #F39C12);
+        opacity: 0.9;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        font-size: 11px;
+        margin: 2px 0 0 0;
+        line-height: 1.1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
     }
   }
 
@@ -166,5 +195,58 @@
     transition: all 0.3s ease;
     padding: 0 !important;
     margin: 0 !important;
+  }
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 768px) {
+  .app-sidebar {
+    width: 220px;
+
+    .sidebar-header {
+      padding: 10px !important;
+      gap: 10px;
+
+      .logo-circle {
+        width: 44px;
+        height: 44px;
+      }
+
+      .shop-info {
+        .shop-name {
+          font-size: 12px;
+        }
+
+        .shop-subtitle {
+          font-size: 10px;
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .app-sidebar {
+    width: 200px;
+
+    .sidebar-header {
+      padding: 8px !important;
+      gap: 8px;
+
+      .logo-circle {
+        width: 40px;
+        height: 40px;
+      }
+
+      .shop-info {
+        .shop-name {
+          font-size: 11px;
+        }
+
+        .shop-subtitle {
+          font-size: 9px;
+        }
+      }
+    }
   }
 }
