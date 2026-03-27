@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StockService } from '../services/stock.service';
 import { Observable } from 'rxjs';
+import { StockItem } from '../models/stock-item.model';
 
 // Angular Material Components
 import { MatCardModule } from '@angular/material/card';
@@ -32,7 +33,7 @@ export class StockOutComponent implements OnInit {
   errorMessage = '';
   lastSavedName = '';
 
-  currentStocks$!: Observable<{ name: string; quantity: number }[]>;
+  currentStocks$!: Observable<StockItem[]>;
 
   ngOnInit(): void {
     this.route.parent?.paramMap.subscribe((params) => {

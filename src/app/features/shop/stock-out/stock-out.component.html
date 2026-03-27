@@ -84,7 +84,7 @@
                        (click)="itemName = item.name" class="stock-item">
           <div matListItemTitle class="item-name">{{ item.name }}</div>
           <div matListItemLine class="item-qty">
-            <span class="qty-badge">{{ item.quantity }}</span> ชิ้น
+            <span class="qty-badge">{{ item.quantity | number:'1.0-2' }}</span>{{ item.unit ? ' ' + item.unit : '' }}
           </div>
         </mat-list-item>
         <div *ngIf="!(currentStocks$ | async)?.length" class="empty-state">

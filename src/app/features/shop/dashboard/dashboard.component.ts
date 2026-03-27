@@ -14,6 +14,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
 import { Sale } from '../models/sale.model';
+import { StockItem } from '../models/stock-item.model';
 
 type TimeRange = 'daily' | 'weekly' | 'monthly';
 
@@ -42,7 +43,7 @@ interface DashboardViewModel {
   totalCost: number;
   periodBreakdown: PeriodSummary[];
   menuBreakdown: MenuSummary[];
-  inventoryItems: { name: string; quantity: number }[];
+  inventoryItems: StockItem[];
   lineChartData: ChartData<'line'>;
   barChartData: ChartData<'bar'>;
 }
@@ -151,7 +152,7 @@ export class DashboardComponent implements OnInit {
   }
 
   private buildDashboardViewModel(
-    inventoryItems: { name: string; quantity: number }[],
+    inventoryItems: StockItem[],
     sales: Sale[],
     selectedRange: TimeRange,
     totalCost: number

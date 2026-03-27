@@ -221,10 +221,8 @@ export class StockService {
     );
   }
 
-  getRemainingStock(shopId: number): Observable<{ name: string; quantity: number }[]> {
-    return this.getStockItems(shopId).pipe(
-      map((items) => items.map((item) => ({ name: item.name, quantity: item.quantity })))
-    );
+  getRemainingStock(shopId: number): Observable<StockItem[]> {
+    return this.getStockItems(shopId);
   }
 
   getMonthlySummary(shopId: number): Observable<{ cost: number; revenue: number; profit: number }> {

@@ -149,7 +149,7 @@
       <div class="inventory-item" *ngFor="let item of vm.inventoryItems" [class.is-low]="item.quantity > 0 && item.quantity < 5" [class.is-empty]="item.quantity <= 0">
         <div class="item-main">
           <p class="item-name">{{ item.name }}</p>
-          <p class="item-qty">{{ item.quantity | number:'1.0-2' }}</p>
+          <p class="item-qty">{{ item.quantity | number:'1.0-2' }}{{ item.unit ? ' ' + item.unit : '' }}</p>
         </div>
         <span class="item-status" [class.status-ok]="item.quantity >= 5" [class.status-low]="item.quantity > 0 && item.quantity < 5" [class.status-empty]="item.quantity <= 0">
           {{ item.quantity <= 0 ? 'หมดสต็อก' : item.quantity < 5 ? 'ใกล้หมด' : 'พร้อมขาย' }}
