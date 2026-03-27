@@ -50,15 +50,15 @@
       </div>
     </mat-card>
 
-    <mat-card class="metric-card finance-card sales-card" [class.finance-card-profit]="vm.currentMonthProfit > 0" [class.finance-card-loss]="vm.currentMonthProfit < 0">
-      <div class="metric-icon" [class.metric-icon-profit]="vm.currentMonthProfit > 0" [class.metric-icon-loss]="vm.currentMonthProfit < 0" [class.metric-icon-average]="vm.currentMonthProfit === 0">
-        <mat-icon>{{ vm.currentMonthProfit >= 0 ? 'account_balance_wallet' : 'trending_down' }}</mat-icon>
+    <mat-card class="metric-card finance-card sales-card" [class.finance-card-profit]="vm.selectedPeriodProfit > 0" [class.finance-card-loss]="vm.selectedPeriodProfit < 0">
+      <div class="metric-icon" [class.metric-icon-profit]="vm.selectedPeriodProfit > 0" [class.metric-icon-loss]="vm.selectedPeriodProfit < 0" [class.metric-icon-average]="vm.selectedPeriodProfit === 0">
+        <mat-icon>{{ vm.selectedPeriodProfit >= 0 ? 'account_balance_wallet' : 'trending_down' }}</mat-icon>
       </div>
       <div class="metric-content finance-content">
-        <p class="metric-label">การเงินเดือน{{ vm.currentMonthLabel }}</p>
-        <p class="finance-line">Total Cost <strong>{{ vm.currentMonthCost | number:'1.2-2' }} ฿</strong></p>
-        <p class="finance-line" [class.finance-profit]="vm.currentMonthProfit > 0" [class.finance-loss]="vm.currentMonthProfit < 0">
-          Profit <strong>{{ vm.currentMonthProfit | number:'1.2-2' }} ฿</strong>
+        <p class="metric-label">การเงินช่วง{{ vm.selectedPeriodLabel }}</p>
+        <p class="finance-line">Total Cost <strong>{{ vm.selectedPeriodCost | number:'1.2-2' }} ฿</strong></p>
+        <p class="finance-line" [class.finance-profit]="vm.selectedPeriodProfit > 0" [class.finance-loss]="vm.selectedPeriodProfit < 0">
+          Profit <strong>{{ vm.selectedPeriodProfit | number:'1.2-2' }} ฿</strong>
         </p>
       </div>
     </mat-card>
@@ -67,7 +67,7 @@
       <mat-card-content>
         <div class="filter-copy">
           <span class="filter-label">ช่วงการวิเคราะห์</span>
-          <p>เลือกมุมมองรายวัน รายสัปดาห์ หรือรายเดือน</p>
+          <p>กำลังดูข้อมูลช่วง {{ vm.selectedPeriodLabel }}</p>
         </div>
 
         <mat-button-toggle-group
@@ -79,6 +79,23 @@
           <mat-button-toggle value="weekly">Weekly</mat-button-toggle>
           <mat-button-toggle value="monthly">Monthly</mat-button-toggle>
         </mat-button-toggle-group>
+
+        <mat-form-field appearance="outline" class="date-range-field">
+          <mat-label>Custom Date Range</mat-label>
+          <mat-date-range-input [rangePicker]="picker">
+            <input matStartDate [(ngModel)]="startDate" (dateChange)="onCustomDateChange()" [ngModelOptions]="{ standalone: true }" placeholder="Start date">
+            <input matEndDate [(ngModel)]="endDate" (dateChange)="onCustomDateChange()" [ngModelOptions]="{ standalone: true }" placeholder="End date">
+          </mat-date-range-input>
+          <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+          <mat-date-range-picker #picker></mat-date-range-picker>
+        </mat-form-field>
+
+        <button mat-stroked-button type="button" class="clear-range-btn" (click)="clearCustomDateRange()" [disabled]="!startDate && !endDate">
+          <mat-icon>event_busy</mat-icon>
+          ล้างช่วงวันที่
+        </button>
+
+        <p class="range-error" *ngIf="dateRangeError">{{ dateRangeError }}</p>
       </mat-card-content>
     </mat-card>
   </div>

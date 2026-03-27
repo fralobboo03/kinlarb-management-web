@@ -51,6 +51,21 @@ $spacing-lg: 24px;
   }
 }
 
+.date-range-field {
+  width: 100%;
+}
+
+.clear-range-btn {
+  align-self: flex-start;
+}
+
+.range-error {
+  margin: 0;
+  color: var(--danger-color, #C62828);
+  font-size: 13px;
+  font-weight: 600;
+}
+
 .filter-copy {
   .filter-label {
     display: inline-block;
