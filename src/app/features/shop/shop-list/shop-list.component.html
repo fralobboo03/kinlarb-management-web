@@ -1,0 +1,57 @@
+<div class="shop-list-container">
+  <div class="header-section text-center py-5">
+    <h1 class="display-5 fw-bold" style="color: var(--primary-color);">🏢 เลือกร้านค้าของคุณ</h1>
+    <p class="text-muted fs-5">ระบบจัดการร้านอาหารอัจฉริยะ (Multi-Shop Management)</p>
+  </div>
+  
+  <div class="container pb-5">
+    <div class="row justify-content-center g-4">
+      <div class="col-12 col-md-6 col-lg-5" *ngFor="let shop of shopsWithSummary$ | async">
+        <!-- Shop Card -->
+        <mat-card class="shop-card h-100 shadow-sm" [routerLink]="['/shops', shop.id]" matRipple>
+          <div class="card-status-strip"></div>
+          
+          <mat-card-header class="pt-4 pb-2 px-4">
+            <div mat-card-avatar class="shop-avatar d-flex justify-content-center align-items-center">
+              <mat-icon>storefront</mat-icon>
+            </div>
+            <mat-card-title class="fs-4 fw-bold mb-1" style="color: var(--card-text);">{{ shop.name }}</mat-card-title>
+            <mat-card-subtitle>สถานะ: <span class="text-success fw-bold">เปิดทำการ</span></mat-card-subtitle>
+          </mat-card-header>
+
+          <mat-card-content class="px-4">
+            <mat-divider class="my-3"></mat-divider>
+            
+            <h6 class="text-muted mb-3 mt-2">
+              <mat-icon inline style="vertical-align: middle;" class="me-1">date_range</mat-icon>
+              สรุปผลประกอบการ (ช่วงเดือนนี้)
+            </h6>
+            
+            <!-- Summary Section -->
+            <div *ngIf="shop.summary$ | async as summary; else loading" class="summary-grid">
+              <div class="summary-item cost">
+                <span class="label">🔴 ทุนรวมที่ลงไป</span>
+                <span class="value">{{ summary.cost | number:'1.2-2' }} ฿</span>
+              </div>
+              <div class="summary-item profit mt-3">
+                <span class="label">⭐ กำไร/ขาดทุน</span>
+                <span class="value" [ngClass]=" summary.profit >= 0 ? 'text-success' : 'text-danger' ">
+                  {{ summary.profit > 0 ? '+' : '' }}{{ summary.profit | number:'1.2-2' }} ฿
+                </span>
+              </div>
+            </div>
+            <ng-template #loading>
+              <div class="text-center text-muted py-3">กำลังเริ่มคำนวณข้อมูล...</div>
+            </ng-template>
+          </mat-card-content>
+
+          <mat-card-actions class="px-4 pb-4 pt-0 d-flex justify-content-end">
+            <button mat-flat-button color="primary" class="enter-btn px-4 py-2">
+              เข้าสู่ระบบร้าน <mat-icon iconPositionEnd>arrow_forward</mat-icon>
+            </button>
+          </mat-card-actions>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

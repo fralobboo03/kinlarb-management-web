@@ -1,0 +1,63 @@
+<div class="stock-in-container">
+  <mat-card class="form-card">
+    <!-- Header Section -->
+    <mat-card-header>
+      <div class="header-content">
+        <h2 class="form-title">
+          <mat-icon class="title-icon">move_to_inbox</mat-icon>
+          รับของเข้าร้าน (Stock In)
+        </h2>
+        <p class="form-subtitle">บันทึกรายการสินค้าที่นำเข้าเข้าร้าน</p>
+      </div>
+    </mat-card-header>
+
+    <!-- Form Content -->
+    <mat-card-content>
+      <form class="stock-in-form" (ngSubmit)="saveStockIn()">
+        <!-- Item Name Field -->
+        <mat-form-field class="full-width">
+          <mat-label>ชื่อสินค้า *</mat-label>
+          <input matInput [(ngModel)]="itemName" name="itemName" placeholder="เช่น เนื้อหมู, ข้าวคั่ว, น้ำเปล่า" required>
+          <mat-icon matSuffix>inventory_2</mat-icon>
+        </mat-form-field>
+
+        <!-- Quantity Field -->
+        <mat-form-field class="full-width">
+          <mat-label>จำนวน *</mat-label>
+          <input matInput type="number" [(ngModel)]="quantity" name="quantity" min="1" required>
+          <mat-icon matSuffix>numbers</mat-icon>
+        </mat-form-field>
+
+        <!-- Cost Field -->
+        <mat-form-field class="full-width">
+          <mat-label>ต้นทุนรวม (ถ้ามี)</mat-label>
+          <input matInput type="number" [(ngModel)]="cost" name="cost" min="0" placeholder="ใส่จำนวนเงิน">
+          <mat-icon matSuffix>attach_money</mat-icon>
+        </mat-form-field>
+
+        <!-- Action Buttons -->
+        <div class="button-group">
+          <button mat-raised-button color="primary" type="submit" [disabled]="!itemName || quantity <= 0" class="btn-save">
+            <mat-icon>check_circle</mat-icon>
+            บันทึกรับเข้า
+          </button>
+          <button mat-stroked-button type="button" (click)="resetForm()" class="btn-reset">
+            <mat-icon>refresh</mat-icon>
+            ล้างฟอร์ม
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- Success Message -->
+  <mat-card class="success-message alert-card" *ngIf="savedStatus">
+    <div class="alert-content">
+      <mat-icon class="alert-icon">check_circle</mat-icon>
+      <div>
+        <p class="alert-title">บันทึกสำเร็จ</p>
+        <p class="alert-message">บันทึกรายการ <strong>{{ lastSavedName }}</strong> สำเร็จ!</p>
+      </div>
+    </div>
+  </mat-card>
+</div>

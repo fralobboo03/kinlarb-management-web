@@ -2,6 +2,8 @@
   height: 100vh;
   margin: 0;
   overflow: hidden;
+  background-color: var(--main-bg, #f4f6f8);
+  transition: background-color 0.3s ease;
 }
 
 /* --- Sidebar Styling --- */
@@ -12,6 +14,7 @@
   border-right: none;
   font-family: inherit;
   overflow-x: hidden;
+  transition: background-color 0.3s ease, color 0.3s ease;
 
 
   .sidebar-header {
@@ -110,9 +113,17 @@
 
 /* --- Topbar Styling --- */
 .app-topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
   background-color: var(--topbar-bg, #ffffff);
   color: var(--topbar-text, #2C2C2C);
   height: 64px;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
   
   .spacer {
     flex: 1 1 auto;
@@ -120,7 +131,7 @@
   
   .menu-btn, .action-btn, .theme-btn {
     color: var(--topbar-text, #2C2C2C);
-    transition: 0.2s;
+    transition: color 0.3s ease;
     font-weight: 500;
     &:hover {
       color: var(--accent-color, #F39C12);
@@ -139,15 +150,21 @@
 }
 
 .content-area {
+  margin-top: 64px;
+  padding-top: 0 !important;
   height: calc(100vh - 64px);
   overflow-y: auto;
+  background-color: var(--main-bg, #f4f6f8);
   
   .content-card {
-    background: var(--card-bg, #ffffff);
+    background: transparent;
     color: var(--card-text, #333333);
-    border-radius: 12px;
-    min-height: 80vh;
-    border: 1px solid var(--border-color, #eaeaea);
+    border-radius: 0;
+    min-height: auto;
+    border: none;
+    box-shadow: none;
     transition: all 0.3s ease;
+    padding: 0 !important;
+    margin: 0 !important;
   }
 }

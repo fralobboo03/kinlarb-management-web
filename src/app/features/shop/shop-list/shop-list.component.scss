@@ -1,0 +1,82 @@
+.shop-list-container {
+  background-color: var(--main-bg, #f4f6f8);
+  min-height: 100vh;
+  width: 100%;
+}
+
+.shop-card {
+  border-radius: 16px !important;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.3s ease;
+  position: relative;
+  border: 1px solid var(--border-color, #eaeaea) !important;
+  background-color: var(--card-bg, #ffffff) !important;
+  
+  &:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1) !important;
+    
+    .enter-btn {
+      background-color: var(--accent-color, #F39C12) !important;
+    }
+  }
+  
+  .card-status-strip {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, var(--primary-color, #8B1E14), var(--accent-color, #F39C12));
+  }
+
+  .shop-avatar {
+    background-color: rgba(243, 156, 18, 0.1);
+    color: var(--accent-color, #F39C12);
+    width: 50px;
+    height: 50px;
+    border-radius: 12px;
+    margin-right: 16px;
+    
+    mat-icon {
+      font-size: 28px;
+      height: 28px;
+      width: 28px;
+    }
+  }
+  
+  .summary-grid {
+    background-color: rgba(0,0,0,0.03);
+    border-radius: 12px;
+    padding: 16px;
+    
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      
+      .label {
+        font-size: 0.95rem;
+        color: var(--card-text, #555);
+        opacity: 0.8;
+      }
+      .value {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--card-text, #333);
+      }
+    }
+  }
+  
+  .enter-btn {
+    background-color: var(--primary-color, #8B1E14) !important;
+    border-radius: 8px !important;
+    transition: background-color 0.3s ease;
+    color: #fff !important;
+  }
+}
+
+::ng-deep body.dark-theme .shop-card .summary-grid {
+  background-color: rgba(255,255,255,0.05);
+}

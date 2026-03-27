@@ -8,32 +8,8 @@ import { Observable } from 'rxjs';
   selector: 'app-dashboard',
   standalone: true,
   imports: [CommonModule],
-  template: `
-    <div>
-      <h3 class="mb-4">📊 ภาพรวมสินค้าคงเหลือ (Dashboard)</h3>
-      <div class="row">
-        <div class="col-md-4 mb-4" *ngFor="let item of remainingStock$ | async">
-          <div class="card shadow-sm" [ngClass]="item.quantity <= 0 ? 'border-danger' : 'border-success'">
-            <div class="card-body d-flex justify-content-between align-items-center">
-              <div>
-                <h5 class="card-title">{{ item.name }}</h5>
-                <small class="text-muted">จำนวนปัจจุบัน</small>
-              </div>
-              <h2 class="mb-0" [ngClass]="item.quantity <= 0 ? 'text-danger' : 'text-success'">
-                {{ item.quantity }}
-              </h2>
-            </div>
-          </div>
-        </div>
-        
-        <div class="col-12" *ngIf="(remainingStock$ | async)?.length === 0">
-          <div class="alert alert-info text-center py-4">
-            ยังไม่มีข้อมูลคลังสินค้า กรุณาทำรายการ Stock In เพื่อเริ่มต้น
-          </div>
-        </div>
-      </div>
-    </div>
-  `
+  templateUrl: './dashboard.component.html',
+  styleUrl: './dashboard.component.scss'
 })
 export class DashboardComponent implements OnInit {
   private route = inject(ActivatedRoute);

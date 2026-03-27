@@ -4,38 +4,19 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { StockService } from '../services/stock.service';
 
+// Angular Material Components
+import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+
 @Component({
   selector: 'app-stock-in',
   standalone: true,
-  imports: [CommonModule, FormsModule],
-  template: `
-    <div>
-      <h3 class="mb-4">📥 รับของเข้าร้าน (Stock In)</h3>
-      <div class="row">
-        <div class="col-md-6">
-          <div class="form-group mb-3">
-            <label class="form-label fw-bold">ชื่อสินค้า</label>
-            <input type="text" class="form-control" [(ngModel)]="itemName" placeholder="เช่น เนื้อหมู, ข้าวคั่ว, น้ำเปล่า">
-          </div>
-          <div class="form-group mb-3">
-            <label class="form-label fw-bold">จำนวน</label>
-            <input type="number" class="form-control" [(ngModel)]="quantity" min="1">
-          </div>
-          <div class="form-group mb-4">
-            <label class="form-label fw-bold">ต้นทุนรวม (ถ้ามี)</label>
-            <input type="number" class="form-control" [(ngModel)]="cost" min="0">
-          </div>
-          <button class="btn btn-success px-4" (click)="saveStockIn()" [disabled]="!itemName || quantity <= 0">
-            ✅ บันทึกรับเข้า
-          </button>
-          
-          <div class="alert alert-success mt-4 shadow-sm" *ngIf="savedStatus">
-            บันทึกรายการ <strong>{{ lastSavedName }}</strong> สำเร็จ!
-          </div>
-        </div>
-      </div>
-    </div>
-  `
+  imports: [CommonModule, FormsModule, MatCardModule, MatFormFieldModule, MatInputModule, MatButtonModule, MatIconModule],
+  templateUrl: './stock-in.component.html',
+  styleUrl: './stock-in.component.scss'
 })
 export class StockInComponent implements OnInit {
   private route = inject(ActivatedRoute);
@@ -67,5 +48,12 @@ export class StockInComponent implements OnInit {
       this.savedStatus = true;
       setTimeout(() => this.savedStatus = false, 3000);
     }
+  }
+
+  resetForm() {
+    this.itemName = '';
+    this.quantity = 1;
+    this.cost = undefined;
+    this.savedStatus = false;
   }
 }
