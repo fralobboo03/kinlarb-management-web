@@ -245,7 +245,7 @@ mat-icon[matSuffix] {
   mat-card-header {
     padding: $spacing-lg;
     border-bottom: 1px solid var(--border-color, #eaeaea);
-    margin: -$spacing-lg -$spacing-lg $spacing-md -$spacing-lg;
+    margin: (-$spacing-lg) (-$spacing-lg) $spacing-md (-$spacing-lg);
   }
 
   mat-card-content {
