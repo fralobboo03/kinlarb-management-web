@@ -28,6 +28,11 @@
         <div matListItemTitle>Sales</div>
       </a>
 
+      <a mat-list-item [routerLink]="['recipe-cost']" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
+        <mat-icon matListItemIcon>calculate</mat-icon>
+        <div matListItemTitle>Recipe Cost</div>
+      </a>
+
       <a mat-list-item [routerLink]="['stock-in']" routerLinkActive="active-link" [routerLinkActiveOptions]="{ exact: true }" class="menu-item">
         <mat-icon matListItemIcon>move_to_inbox</mat-icon>
         <div matListItemTitle>Stock In (รับเข้า)</div>

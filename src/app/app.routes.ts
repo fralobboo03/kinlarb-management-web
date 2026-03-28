@@ -32,6 +32,10 @@ export const routes: Routes = [
         loadComponent: () => import('./features/shop/sales/sales.component').then(m => m.SalesComponent)
       },
       {
+        path: 'recipe-cost',
+        loadComponent: () => import('./features/shop/recipe-cost/recipe-cost.component').then(m => m.RecipeCostComponent)
+      },
+      {
         path: 'history',
         loadComponent: () => import('./features/shop/history/history.component').then(m => m.HistoryComponent)
       }

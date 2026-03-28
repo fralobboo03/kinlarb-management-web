@@ -1,0 +1,141 @@
+$spacing-xs: 8px;
+$spacing-md: 16px;
+$spacing-lg: 24px;
+
+.recipe-cost-container {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: $spacing-lg;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-lg;
+}
+
+.page-title {
+  display: flex;
+  align-items: center;
+  gap: $spacing-md;
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0 0 $spacing-xs;
+  color: var(--primary-color, #8B1E14);
+
+  .title-icon {
+    color: var(--accent-color, #F39C12);
+  }
+}
+
+.page-subtitle {
+  margin: 0;
+  color: var(--card-text, #666);
+  opacity: 0.85;
+}
+
+.meta-card,
+.table-card,
+.summary-card {
+  border-radius: 12px;
+  border: 1px solid var(--border-color, #eaeaea);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+
+  mat-card-content {
+    padding: $spacing-lg;
+  }
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: $spacing-md;
+}
+
+.recipe-table {
+  width: 100%;
+
+  th {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  td,
+  th {
+    border-bottom: 1px solid var(--border-color, #eaeaea);
+  }
+}
+
+.cell-input {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--card-text, #333) 5%, transparent);
+  padding: 6px 8px;
+  color: inherit;
+
+  &:focus {
+    outline: none;
+    border-color: var(--accent-color, #F39C12);
+  }
+}
+
+.align-right {
+  text-align: right;
+}
+
+.cost-cell {
+  font-weight: 700;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-md;
+}
+
+.summary-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: $spacing-md;
+  padding-bottom: $spacing-xs;
+  border-bottom: 1px solid var(--border-color, #eaeaea);
+
+  strong {
+    font-size: 18px;
+  }
+}
+
+.inputs-row {
+  grid-template-columns: minmax(0, 260px) auto;
+
+  mat-form-field {
+    margin-bottom: -18px;
+  }
+}
+
+@media (max-width: 900px) {
+  .meta-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .recipe-cost-container {
+    padding: $spacing-md;
+  }
+
+  .meta-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-row,
+  .inputs-row {
+    grid-template-columns: 1fr;
+    align-items: flex-start;
+
+    strong {
+      margin-top: -8px;
+    }
+  }
+}
