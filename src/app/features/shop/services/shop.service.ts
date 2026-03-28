@@ -16,7 +16,7 @@ export class ShopService {
     this.isBrowser = isPlatformBrowser(platformId);
 
     const defaultShops = [
-      { id: 1, name: 'KIN LARBBBBBB' },
+      { id: 1, name: 'KIN LARB' },
       { id: 2, name: 'KIN SMOOTH' }
     ];
 
