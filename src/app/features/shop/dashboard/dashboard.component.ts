@@ -17,7 +17,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { BaseChartDirective } from 'ng2-charts';
 import { ChartData, ChartOptions } from 'chart.js';
-import { Sale } from '../models/sale.model';
+import { Order } from '../models/order.model';
 import { StockItem } from '../models/stock-item.model';
 import { StockTransaction } from '../models/stock-transaction.model';
 
@@ -44,7 +44,7 @@ interface PeriodSummary {
 }
 
 interface MenuSummary {
-  menuName: string;
+  recipeName: string;
   revenue: number;
   quantitySold: number;
   orderCount: number;
@@ -53,7 +53,7 @@ interface MenuSummary {
 interface DashboardViewModel {
   totalRevenue: number;
   totalOrders: number;
-  topMenu: string;
+  topRecipe: string;
   averagePerOrder: number;
   selectedPeriodLabel: string;
   selectedPeriodRevenue: number;
@@ -164,13 +164,13 @@ export class DashboardComponent implements OnInit {
       return combineLatest([
         this.stockService.getRemainingStock(shopId).pipe(startWith([])),
         this.stockService.getHistory(shopId).pipe(startWith([])),
-        this.salesService.getSalesByShop(shopId).pipe(startWith([]))
+        this.salesService.getOrdersByShop(shopId).pipe(startWith([]))
       ]).pipe(
-        map(([inventoryItems, transactions, sales]) =>
+        map(([inventoryItems, transactions, orders]) =>
           this.buildDashboardViewModel(
             inventoryItems ?? [],
             transactions ?? [],
-            sales ?? [],
+            orders ?? [],
             filterMode,
             selectedRange,
             customDateRange
@@ -262,21 +262,24 @@ export class DashboardComponent implements OnInit {
   private buildDashboardViewModel(
     inventoryItems: StockItem[],
     transactions: StockTransaction[],
-    sales: Sale[],
+    orders: Order[],
     filterMode: FilterMode,
     selectedRange: TimeRange | null,
     customDateRange: CustomDateRange
   ): DashboardViewModel {
     const safeInventoryItems = inventoryItems ?? [];
     const safeTransactions = transactions ?? [];
-    const safeSales = sales ?? [];
+    const safeOrders = orders ?? [];
     const activeFilter = this.getActiveDateFilter(filterMode, selectedRange, customDateRange);
-    const filteredSales = this.filterSalesByDateRange(safeSales, activeFilter.startDate, activeFilter.endDate);
+    const filteredOrders = this.filterOrdersByDateRange(safeOrders, activeFilter.startDate, activeFilter.endDate);
     const filteredTransactions = this.filterTransactionsByDateRange(safeTransactions, activeFilter.startDate, activeFilter.endDate);
-    const periodBreakdown = this.groupSalesByPeriod(filteredSales, activeFilter.isCustom ? 'daily' : (selectedRange ?? this.defaultPresetRange));
-    const menuBreakdown = this.groupSalesByMenu(filteredSales);
-    const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.totalPrice, 0);
-    const totalOrders = filteredSales.reduce((sum, sale) => sum + sale.quantitySold, 0);
+    const periodBreakdown = this.groupOrdersByPeriod(filteredOrders, activeFilter.isCustom ? 'daily' : (selectedRange ?? this.defaultPresetRange));
+    const menuBreakdown = this.groupOrdersByRecipe(filteredOrders);
+    const totalRevenue = filteredOrders.reduce((sum, order) => sum + order.totalAmount, 0);
+    const totalOrders = filteredOrders.reduce((sum, order) => {
+      const quantitySum = order.items.reduce((itemSum, item) => itemSum + item.quantity, 0);
+      return sum + quantitySum;
+    }, 0);
     const totalCost = filteredTransactions
       .filter((transaction) => transaction.type === 'IN')
       .reduce((sum, transaction) => sum + (transaction.totalCost ?? transaction.cost ?? 0), 0);
@@ -285,7 +288,7 @@ export class DashboardComponent implements OnInit {
     return {
       totalRevenue,
       totalOrders,
-      topMenu: menuBreakdown[0]?.menuName ?? '-',
+      topRecipe: menuBreakdown[0]?.recipeName ?? '-',
       averagePerOrder: totalOrders > 0 ? totalRevenue / totalOrders : 0,
       selectedPeriodLabel: activeFilter.label,
       selectedPeriodRevenue: totalRevenue,
@@ -303,12 +306,12 @@ export class DashboardComponent implements OnInit {
     };
   }
 
-  private groupSalesByPeriod(sales: Sale[], selectedRange: TimeRange): PeriodSummary[] {
+  private groupOrdersByPeriod(orders: Order[], selectedRange: TimeRange): PeriodSummary[] {
     const groups = new Map<string, PeriodSummary>();
 
-    for (const sale of sales) {
-      const saleDate = new Date(sale.date);
-      const period = this.getPeriodMeta(saleDate, selectedRange);
+    for (const order of orders) {
+      const orderDate = new Date(order.orderDate);
+      const period = this.getPeriodMeta(orderDate, selectedRange);
       const current = groups.get(period.key) ?? {
         label: period.label,
         revenue: 0,
@@ -316,30 +319,33 @@ export class DashboardComponent implements OnInit {
         sortValue: period.sortValue
       };
 
-      current.revenue += sale.totalPrice;
-      current.quantitySold += sale.quantitySold;
+      const totalQuantity = order.items.reduce((sum, item) => sum + item.quantity, 0);
+      current.revenue += order.totalAmount;
+      current.quantitySold += totalQuantity;
       groups.set(period.key, current);
     }
 
     return Array.from(groups.values()).sort((a, b) => a.sortValue - b.sortValue);
   }
 
-  private groupSalesByMenu(sales: Sale[]): MenuSummary[] {
+  private groupOrdersByRecipe(orders: Order[]): MenuSummary[] {
     const groups = new Map<string, MenuSummary>();
 
-    for (const sale of sales) {
-      const key = sale.menuName.trim();
-      const current = groups.get(key) ?? {
-        menuName: sale.menuName,
-        revenue: 0,
-        quantitySold: 0,
-        orderCount: 0
-      };
+    for (const order of orders) {
+      for (const item of order.items) {
+        const key = item.recipeName.trim().toLowerCase();
+        const current = groups.get(key) ?? {
+          recipeName: item.recipeName,
+          revenue: 0,
+          quantitySold: 0,
+          orderCount: 0
+        };
 
-      current.revenue += sale.totalPrice;
-      current.quantitySold += sale.quantitySold;
-      current.orderCount += 1;
-      groups.set(key, current);
+        current.revenue += item.totalPrice;
+        current.quantitySold += item.quantity;
+        current.orderCount += 1;
+        groups.set(key, current);
+      }
     }
 
     return Array.from(groups.values()).sort((a, b) => {
@@ -425,7 +431,7 @@ export class DashboardComponent implements OnInit {
     const accentColor = this.getCssColor('--accent-color', '#f39c12');
 
     return {
-      labels: topMenus.map((menu) => menu.menuName),
+      labels: topMenus.map((menu) => menu.recipeName),
       datasets: [
         {
           label: 'Quantity Sold',
@@ -444,7 +450,7 @@ export class DashboardComponent implements OnInit {
     return {
       totalRevenue: 0,
       totalOrders: 0,
-      topMenu: '-',
+      topRecipe: '-',
       averagePerOrder: 0,
       selectedPeriodLabel: this.getPresetLabel('monthly'),
       selectedPeriodRevenue: 0,
@@ -502,10 +508,10 @@ export class DashboardComponent implements OnInit {
     };
   }
 
-  private filterSalesByDateRange(sales: Sale[], startDate: Date, endDate: Date): Sale[] {
-    return sales.filter((sale) => {
-      const saleDate = new Date(sale.date);
-      return saleDate >= startDate && saleDate <= endDate;
+  private filterOrdersByDateRange(orders: Order[], startDate: Date, endDate: Date): Order[] {
+    return orders.filter((order) => {
+      const orderDate = new Date(order.orderDate);
+      return orderDate >= startDate && orderDate <= endDate;
     });
   }
 

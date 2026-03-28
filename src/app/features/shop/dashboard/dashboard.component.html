@@ -35,8 +35,8 @@
         <mat-icon>emoji_events</mat-icon>
       </div>
       <div class="metric-content">
-        <p class="metric-label">เมนูยอดนิยม</p>
-        <h3 class="metric-value metric-value-text">{{ vm.topMenu }}</h3>
+        <p class="metric-label">สูตรยอดนิยม</p>
+        <h3 class="metric-value metric-value-text">{{ vm.topRecipe }}</h3>
       </div>
     </mat-card>
 
@@ -137,8 +137,8 @@
     <mat-card class="analytics-card bar-chart-card">
       <div class="section-header">
         <div>
-          <h2 class="section-title">Top-Selling Menus</h2>
-          <p class="section-subtitle">เมนูที่ขายดีที่สุดตามจำนวนที่ขาย</p>
+          <h2 class="section-title">Top-Selling Recipes</h2>
+          <p class="section-subtitle">สูตรที่ขายดีที่สุดตามจำนวนที่ขาย</p>
         </div>
       </div>
 
@@ -150,8 +150,8 @@
     <mat-card class="analytics-card ranking-card">
       <div class="section-header">
         <div>
-          <h2 class="section-title">Menu Ranking</h2>
-          <p class="section-subtitle">สรุปยอดขายต่อเมนูและจัดอันดับ</p>
+          <h2 class="section-title">Recipe Ranking</h2>
+          <p class="section-subtitle">สรุปยอดขายต่อสูตรและจัดอันดับ</p>
         </div>
       </div>
 
@@ -160,7 +160,7 @@
           <div class="ranking-main">
             <span class="rank-badge">#{{ index + 1 }}</span>
             <div>
-              <p class="ranking-name">{{ menu.menuName }}</p>
+              <p class="ranking-name">{{ menu.recipeName }}</p>
               <p class="ranking-meta">{{ menu.quantitySold | number:'1.0-0' }} รายการ • {{ menu.orderCount }} ออเดอร์</p>
             </div>
           </div>
@@ -219,13 +219,13 @@
 <ng-template #noMenuSales>
   <div class="empty-chart-state">
     <mat-icon>bar_chart</mat-icon>
-    <p>ยังไม่มีข้อมูลยอดขายรายเมนู</p>
+    <p>ยังไม่มีข้อมูลยอดขายรายสูตร</p>
   </div>
 </ng-template>
 
 <ng-template #noRanking>
   <div class="empty-chart-state compact-empty-state">
     <mat-icon>leaderboard</mat-icon>
-    <p>ยังไม่มีเมนูที่ถูกขาย</p>
+    <p>ยังไม่มีสูตรที่ถูกขาย</p>
   </div>
 </ng-template>

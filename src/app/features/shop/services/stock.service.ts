@@ -5,11 +5,6 @@ import { map } from 'rxjs/operators';
 import { StockTransaction } from '../models/stock-transaction.model';
 import { StockItem } from '../models/stock-item.model';
 
-interface StockDeduction {
-  name: string;
-  quantity: number;
-}
-
 @Injectable({
   providedIn: 'root'
 })
@@ -109,39 +104,6 @@ export class StockService {
           }));
       })
     );
-  }
-
-  canDeductStock(shopId: number, deductions: StockDeduction[]): { valid: boolean; insufficientItems: string[] } {
-    const currentStock = this.getCurrentStockMap(shopId);
-    const insufficientItems = deductions
-      .filter((item) => item.quantity > 0)
-      .filter((item) => (currentStock.get(item.name.trim().toLowerCase()) ?? 0) < item.quantity)
-      .map((item) => item.name);
-
-    return { valid: insufficientItems.length === 0, insufficientItems };
-  }
-
-  recordSaleStockOut(shopId: number, deductions: StockDeduction[]): void {
-    for (const deduction of deductions) {
-      if (deduction.quantity <= 0) {
-        continue;
-      }
-
-      const unit = this.getLatestUnit(shopId, deduction.name);
-      this.addTransaction({
-        shopId,
-        type: 'OUT',
-        name: deduction.name,
-        unit,
-        quantity: deduction.quantity,
-        price: undefined,
-        date: new Date(),
-        // Keep a readable source in name context for history consumers if needed.
-        cost: undefined,
-        totalCost: undefined,
-        pricePerUnit: undefined
-      });
-    }
   }
 
   private deductStock(shopId: number, name: string, quantity: number, price?: number): boolean {

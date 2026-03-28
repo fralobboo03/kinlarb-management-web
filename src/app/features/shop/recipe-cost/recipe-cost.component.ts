@@ -2,12 +2,16 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Observable, of } from 'rxjs';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatTableModule } from '@angular/material/table';
 import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { Recipe } from '../models/recipe.model';
+import { RecipeService } from '../services/recipe.service';
 
 interface IngredientSeed {
   purchasedPrice: number;
@@ -28,7 +32,8 @@ interface IngredientSeed {
     MatFormFieldModule,
     MatInputModule,
     MatTableModule,
-    MatIconModule
+    MatIconModule,
+    MatButtonModule
   ],
   templateUrl: './recipe-cost.component.html',
   styleUrl: './recipe-cost.component.scss'
@@ -36,8 +41,12 @@ interface IngredientSeed {
 export class RecipeCostComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
+  private readonly recipeService = inject(RecipeService);
 
   shopId = 0;
+  savedRecipes$: Observable<Recipe[]> = of([]);
+  saveError = '';
+  saveSuccess = false;
 
   readonly displayedColumns: string[] = [
     'purchasedPrice',
@@ -48,6 +57,8 @@ export class RecipeCostComponent implements OnInit {
     'recipeUnit',
     'individualCost'
   ];
+
+  readonly savedRecipeColumns: string[] = ['name', 'totalCost', 'suggestedPrice', 'createdAt'];
 
   readonly ingredientSeeds: IngredientSeed[] = [
     { purchasedPrice: 542, purchaseUnit: 'กก', ingredient: 'เชดด้าชีส', eyPercent: 100, recipeQty: 0.04, recipeUnit: 'กก' },
@@ -96,6 +107,7 @@ export class RecipeCostComponent implements OnInit {
   ngOnInit(): void {
     this.route.parent?.paramMap.subscribe((params) => {
       this.shopId = Number(params.get('shopId'));
+      this.savedRecipes$ = this.recipeService.getRecipesByShop(this.shopId);
     });
 
     this.recipeForm.valueChanges.subscribe(() => {
@@ -103,6 +115,53 @@ export class RecipeCostComponent implements OnInit {
     });
 
     this.recalculateAll();
+  }
+
+  saveRecipe(): void {
+    this.saveError = '';
+    this.saveSuccess = false;
+
+    if (this.recipeForm.invalid || this.shopId <= 0) {
+      this.recipeForm.markAllAsTouched();
+      return;
+    }
+
+    const raw = this.recipeForm.getRawValue();
+    const recipeName = (raw.recipeName ?? '').trim();
+
+    if (!recipeName) {
+      this.saveError = 'กรุณาระบุชื่อสูตร';
+      return;
+    }
+
+    const ingredients = (raw.ingredients ?? [])
+      .map((ingredient) => ({
+        purchasedPrice: Number(ingredient?.purchasedPrice ?? 0),
+        purchaseUnit: String(ingredient?.purchaseUnit ?? '').trim(),
+        ingredient: String(ingredient?.ingredient ?? '').trim(),
+        eyPercent: Number(ingredient?.eyPercent ?? 0),
+        recipeQty: Number(ingredient?.recipeQty ?? 0),
+        recipeUnit: String(ingredient?.recipeUnit ?? '').trim(),
+        individualCost: Number(ingredient?.individualCost ?? 0)
+      }))
+      .filter((ingredient) => ingredient.ingredient.length > 0);
+
+    if (ingredients.length === 0) {
+      this.saveError = 'กรุณาระบุวัตถุดิบอย่างน้อย 1 รายการ';
+      return;
+    }
+
+    this.recipeService.createRecipe(this.shopId, {
+      name: recipeName,
+      totalCost: Number(raw.recipeCost ?? 0),
+      suggestedPrice: Number(raw.preliminarySellingPrice ?? 0),
+      ingredients
+    });
+
+    this.saveSuccess = true;
+    setTimeout(() => {
+      this.saveSuccess = false;
+    }, 3000);
   }
 
   private createIngredientGroup(seed: IngredientSeed) {

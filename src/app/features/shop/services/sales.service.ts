@@ -2,79 +2,98 @@ import { Inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Menu } from '../models/menu.model';
-import { Sale } from '../models/sale.model';
-import { StockService } from './stock.service';
+import { Order, OrderItem } from '../models/order.model';
+import { Recipe } from '../models/recipe.model';
 
 interface SaleResult {
   success: boolean;
   error?: string;
 }
 
+interface StoredOrder extends Order {
+  shopId: number;
+}
+
 @Injectable({
   providedIn: 'root'
 })
 export class SalesService {
-  private readonly STORAGE_KEY = 'kinlarb_sales';
-  private readonly salesSubject = new BehaviorSubject<Sale[]>([]);
-  readonly sales$ = this.salesSubject.asObservable();
+  private readonly STORAGE_KEY = 'kinlarb_orders';
+  private readonly ordersSubject = new BehaviorSubject<StoredOrder[]>([]);
+  readonly orders$ = this.ordersSubject.asObservable();
   private readonly isBrowser: boolean;
 
-  constructor(
-    @Inject(PLATFORM_ID) platformId: object,
-    private readonly stockService: StockService
-  ) {
+  constructor(@Inject(PLATFORM_ID) platformId: object) {
     this.isBrowser = isPlatformBrowser(platformId);
     if (this.isBrowser) {
-      this.salesSubject.next(this.loadSales());
+      this.ordersSubject.next(this.loadOrders());
     }
   }
 
-  getSalesByShop(shopId: number): Observable<Sale[]> {
-    return this.sales$.pipe(
-      map((sales) =>
-        sales
-          .filter((sale) => sale.shopId === shopId)
-          .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  getOrdersByShop(shopId: number): Observable<Order[]> {
+    return this.orders$.pipe(
+      map((orders) =>
+        orders
+          .filter((order) => order.shopId === shopId)
+          .sort((a, b) => new Date(b.orderDate).getTime() - new Date(a.orderDate).getTime())
+          .map(({ shopId: _, ...order }) => order)
       )
     );
   }
 
-  recordSale(shopId: number, sale: Omit<Sale, 'id' | 'shopId'>, menu: Menu): SaleResult {
-    if (sale.quantitySold <= 0 || sale.pricePerUnit <= 0) {
-      return { success: false, error: 'จำนวนขายและราคาต่อหน่วยต้องมากกว่า 0' };
+  // Backward-compatible alias for existing consumers.
+  getSalesByShop(shopId: number): Observable<Order[]> {
+    return this.getOrdersByShop(shopId);
+  }
+
+  recordOrder(shopId: number, order: Omit<Order, 'id'>, recipes: Recipe[]): SaleResult {
+    const validItems = (order.items ?? []).filter(
+      (item) => item.recipeId > 0 && item.quantity > 0 && item.pricePerUnit > 0
+    );
+
+    if (validItems.length === 0) {
+      return { success: false, error: 'กรุณาเพิ่มรายการขายอย่างน้อย 1 รายการ' };
     }
 
-    const deductions = menu.ingredients
-      .filter((ingredient) => ingredient.quantity != null)
-      .map((ingredient) => ({
-        name: ingredient.name,
-        quantity: (ingredient.quantity ?? 0) * sale.quantitySold
-      }));
-
-    const stockValidation = this.stockService.canDeductStock(shopId, deductions);
-    if (!stockValidation.valid) {
-      return {
-        success: false,
-        error: `สต็อกไม่พอสำหรับ: ${stockValidation.insufficientItems.join(', ')}`
-      };
+    const normalizedRecipeMap = new Map<number, Recipe>();
+    for (const recipe of recipes) {
+      if (recipe.id) {
+        normalizedRecipeMap.set(recipe.id, recipe);
+      }
     }
 
-    this.stockService.recordSaleStockOut(shopId, deductions);
+    for (const item of validItems) {
+      const recipe = normalizedRecipeMap.get(item.recipeId);
+      if (!recipe) {
+        return { success: false, error: `ไม่พบสูตรที่เลือก: ${item.recipeName}` };
+      }
+    }
 
-    const nextSale: Sale = {
-      ...sale,
+    const sanitizedItems: OrderItem[] = validItems.map((item) => ({
+      recipeId: item.recipeId,
+      recipeName: item.recipeName,
+      quantity: item.quantity,
+      pricePerUnit: item.pricePerUnit,
+      totalPrice: item.totalPrice
+    }));
+
+    const totalAmount = sanitizedItems.reduce((sum, item) => sum + item.totalPrice, 0);
+
+    const nextOrder: StoredOrder = {
+      ...order,
       id: Date.now(),
-      shopId
+      shopId,
+      items: sanitizedItems,
+      totalAmount
     };
 
-    const current = this.salesSubject.getValue();
-    this.saveSales([...current, nextSale]);
+    const current = this.ordersSubject.getValue();
+    this.saveOrders([...current, nextOrder]);
 
     return { success: true };
   }
 
-  private loadSales(): Sale[] {
+  private loadOrders(): StoredOrder[] {
     if (!this.isBrowser) {
       return [];
     }
@@ -85,17 +104,17 @@ export class SalesService {
     }
 
     try {
-      const parsed = JSON.parse(payload) as Sale[];
+      const parsed = JSON.parse(payload) as StoredOrder[];
       return Array.isArray(parsed) ? parsed : [];
     } catch {
       return [];
     }
   }
 
-  private saveSales(sales: Sale[]): void {
+  private saveOrders(orders: StoredOrder[]): void {
     if (this.isBrowser) {
-      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(sales));
+      localStorage.setItem(this.STORAGE_KEY, JSON.stringify(orders));
     }
-    this.salesSubject.next(sales);
+    this.ordersSubject.next(orders);
   }
 }
