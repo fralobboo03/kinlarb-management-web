@@ -32,6 +32,12 @@ $spacing-lg: 24px;
   opacity: 0.85;
 }
 
+.edit-mode-indicator {
+  margin: $spacing-xs 0 0;
+  color: var(--accent-color, #F39C12);
+  font-weight: 700;
+}
+
 .meta-card,
 .table-card,
 .summary-card {
@@ -118,6 +124,7 @@ $spacing-lg: 24px;
   margin-top: $spacing-md;
   display: flex;
   justify-content: flex-end;
+  gap: $spacing-md;
 }
 
 .error-text {

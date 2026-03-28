@@ -32,6 +32,7 @@ export class RecipeService {
 
   createRecipe(shopId: number, input: {
     name: string;
+    marginPercent: number;
     totalCost: number;
     suggestedPrice: number;
     ingredients: RecipeIngredient[];
@@ -41,6 +42,7 @@ export class RecipeService {
       id: Date.now(),
       shopId,
       name: input.name,
+      marginPercent: input.marginPercent,
       totalCost: input.totalCost,
       suggestedPrice: input.suggestedPrice,
       ingredients: input.ingredients,
@@ -49,6 +51,40 @@ export class RecipeService {
 
     this.saveRecipes([...current, recipe]);
     return recipe;
+  }
+
+  updateRecipe(recipeId: number, input: {
+    name: string;
+    marginPercent: number;
+    totalCost: number;
+    suggestedPrice: number;
+    ingredients: RecipeIngredient[];
+  }): boolean {
+    const current = this.recipesSubject.getValue();
+    let updated = false;
+
+    const nextRecipes = current.map((recipe) => {
+      if (recipe.id !== recipeId) {
+        return recipe;
+      }
+
+      updated = true;
+      return {
+        ...recipe,
+        name: input.name,
+        marginPercent: input.marginPercent,
+        totalCost: input.totalCost,
+        suggestedPrice: input.suggestedPrice,
+        ingredients: input.ingredients
+      };
+    });
+
+    if (!updated) {
+      return false;
+    }
+
+    this.saveRecipes(nextRecipes);
+    return true;
   }
 
   getRecipeById(recipeId: number): Recipe | undefined {

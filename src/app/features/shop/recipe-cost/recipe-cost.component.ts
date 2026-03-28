@@ -14,12 +14,10 @@ import { Recipe } from '../models/recipe.model';
 import { RecipeService } from '../services/recipe.service';
 
 interface IngredientSeed {
-  purchasedPrice: number;
-  purchaseUnit: string;
-  ingredient: string;
-  eyPercent: number;
-  recipeQty: number;
-  recipeUnit: string;
+  stockItemId: number | null;
+  name: string;
+  quantityUsed: number;
+  costPerUnit: number;
 }
 
 @Component({
@@ -44,39 +42,38 @@ export class RecipeCostComponent implements OnInit {
   private readonly recipeService = inject(RecipeService);
 
   shopId = 0;
+  editingRecipeId: number | null = null;
   savedRecipes$: Observable<Recipe[]> = of([]);
   saveError = '';
   saveSuccess = false;
 
   readonly displayedColumns: string[] = [
-    'purchasedPrice',
-    'purchaseUnit',
-    'ingredient',
-    'eyPercent',
-    'recipeQty',
-    'recipeUnit',
-    'individualCost'
+    'stockItemId',
+    'name',
+    'quantityUsed',
+    'costPerUnit',
+    'totalCost'
   ];
 
-  readonly savedRecipeColumns: string[] = ['name', 'totalCost', 'suggestedPrice', 'createdAt'];
+  readonly savedRecipeColumns: string[] = ['name', 'marginPercent', 'totalCost', 'suggestedPrice', 'createdAt', 'actions'];
 
   readonly ingredientSeeds: IngredientSeed[] = [
-    { purchasedPrice: 542, purchaseUnit: 'กก', ingredient: 'เชดด้าชีส', eyPercent: 100, recipeQty: 0.04, recipeUnit: 'กก' },
-    { purchasedPrice: 1261, purchaseUnit: 'กก', ingredient: 'บรีชีส', eyPercent: 100, recipeQty: 0.03, recipeUnit: 'กก' },
-    { purchasedPrice: 915, purchaseUnit: 'กก', ingredient: 'บลูชีส', eyPercent: 100, recipeQty: 0.04, recipeUnit: 'กก' },
-    { purchasedPrice: 1093, purchaseUnit: 'กก', ingredient: 'กรานาพาดาโน่', eyPercent: 100, recipeQty: 0.04, recipeUnit: 'กก' },
-    { purchasedPrice: 873, purchaseUnit: 'กก', ingredient: 'สโมคชีส', eyPercent: 100, recipeQty: 0.04, recipeUnit: 'กก' },
-    { purchasedPrice: 20, purchaseUnit: 'ลูก', ingredient: 'แอปเปิ้ล', eyPercent: 100, recipeQty: 0.5, recipeUnit: 'กก' },
-    { purchasedPrice: 200, purchaseUnit: 'กก', ingredient: 'สตอเบอรี่สด', eyPercent: 100, recipeQty: 0.03, recipeUnit: 'กก' },
-    { purchasedPrice: 100, purchaseUnit: 'กก', ingredient: 'เคบกู้สเบอรี่สด', eyPercent: 100, recipeQty: 0.06, recipeUnit: 'กก' },
-    { purchasedPrice: 200, purchaseUnit: 'กก', ingredient: 'บลูเบอรี่', eyPercent: 100, recipeQty: 0.03, recipeUnit: 'กก' },
-    { purchasedPrice: 100, purchaseUnit: 'กก', ingredient: 'องุ่น', eyPercent: 100, recipeQty: 0.08, recipeUnit: 'กก' },
-    { purchasedPrice: 160, purchaseUnit: 'กก', ingredient: 'น้ำผึ้ง', eyPercent: 100, recipeQty: 0.05, recipeUnit: 'กก' },
-    { purchasedPrice: 120, purchaseUnit: 'กก', ingredient: 'มะกอกดำ,เขียว', eyPercent: 100, recipeQty: 0.05, recipeUnit: 'กก' },
-    { purchasedPrice: 1500, purchaseUnit: 'กก', ingredient: 'Salami', eyPercent: 100, recipeQty: 0.03, recipeUnit: 'กก' },
-    { purchasedPrice: 1500, purchaseUnit: 'กก', ingredient: 'Parma Ham', eyPercent: 100, recipeQty: 0.03, recipeUnit: 'กก' },
-    { purchasedPrice: 1500, purchaseUnit: 'กก', ingredient: 'Coppa', eyPercent: 100, recipeQty: 0.03, recipeUnit: 'กก' },
-    { purchasedPrice: 600, purchaseUnit: 'กก', ingredient: 'C00k Ham', eyPercent: 100, recipeQty: 0.03, recipeUnit: 'กก' }
+    { stockItemId: null, name: 'เชดด้าชีส', quantityUsed: 0.04, costPerUnit: 542 },
+    { stockItemId: null, name: 'บรีชีส', quantityUsed: 0.03, costPerUnit: 1261 },
+    { stockItemId: null, name: 'บลูชีส', quantityUsed: 0.04, costPerUnit: 915 },
+    { stockItemId: null, name: 'กรานาพาดาโน่', quantityUsed: 0.04, costPerUnit: 1093 },
+    { stockItemId: null, name: 'สโมคชีส', quantityUsed: 0.04, costPerUnit: 873 },
+    { stockItemId: null, name: 'แอปเปิ้ล', quantityUsed: 0.5, costPerUnit: 20 },
+    { stockItemId: null, name: 'สตอเบอรี่สด', quantityUsed: 0.03, costPerUnit: 200 },
+    { stockItemId: null, name: 'เคบกู้สเบอรี่สด', quantityUsed: 0.06, costPerUnit: 100 },
+    { stockItemId: null, name: 'บลูเบอรี่', quantityUsed: 0.03, costPerUnit: 200 },
+    { stockItemId: null, name: 'องุ่น', quantityUsed: 0.08, costPerUnit: 100 },
+    { stockItemId: null, name: 'น้ำผึ้ง', quantityUsed: 0.05, costPerUnit: 160 },
+    { stockItemId: null, name: 'มะกอกดำ,เขียว', quantityUsed: 0.05, costPerUnit: 120 },
+    { stockItemId: null, name: 'Salami', quantityUsed: 0.03, costPerUnit: 1500 },
+    { stockItemId: null, name: 'Parma Ham', quantityUsed: 0.03, costPerUnit: 1500 },
+    { stockItemId: null, name: 'Coppa', quantityUsed: 0.03, costPerUnit: 1500 },
+    { stockItemId: null, name: 'C00k Ham', quantityUsed: 0.03, costPerUnit: 600 }
   ];
 
   readonly recipeForm = this.fb.group({
@@ -88,7 +85,7 @@ export class RecipeCostComponent implements OnInit {
     preparedBy: ['อาร์ม'],
     ingredients: this.fb.array(this.ingredientSeeds.map((seed) => this.createIngredientGroup(seed))),
     qFactorPercent: [5, [Validators.required, Validators.min(0)]],
-    desiredCostPercent: [0.35, [Validators.required, Validators.min(0)]],
+    marginPercent: [35, [Validators.required, Validators.min(0.0001)]],
     actualMenuPrice: [650, [Validators.required, Validators.min(0)]],
     discountPercent: [0, [Validators.required, Validators.min(0)]],
     totalIngredientsCost: [{ value: 0, disabled: true }],
@@ -136,43 +133,102 @@ export class RecipeCostComponent implements OnInit {
 
     const ingredients = (raw.ingredients ?? [])
       .map((ingredient) => ({
-        purchasedPrice: Number(ingredient?.purchasedPrice ?? 0),
-        purchaseUnit: String(ingredient?.purchaseUnit ?? '').trim(),
-        ingredient: String(ingredient?.ingredient ?? '').trim(),
-        eyPercent: Number(ingredient?.eyPercent ?? 0),
-        recipeQty: Number(ingredient?.recipeQty ?? 0),
-        recipeUnit: String(ingredient?.recipeUnit ?? '').trim(),
-        individualCost: Number(ingredient?.individualCost ?? 0)
+        stockItemId: ingredient?.stockItemId != null ? Number(ingredient.stockItemId) : null,
+        name: String(ingredient?.name ?? '').trim(),
+        quantityUsed: Number(ingredient?.quantityUsed ?? 0),
+        costPerUnit: Number(ingredient?.costPerUnit ?? 0),
+        totalCost: Number(ingredient?.totalCost ?? 0)
       }))
-      .filter((ingredient) => ingredient.ingredient.length > 0);
+      .filter((ingredient) => ingredient.name.length > 0);
 
     if (ingredients.length === 0) {
       this.saveError = 'กรุณาระบุวัตถุดิบอย่างน้อย 1 รายการ';
       return;
     }
 
-    this.recipeService.createRecipe(this.shopId, {
+    const payload = {
       name: recipeName,
+      marginPercent: Number(raw.marginPercent ?? 0),
       totalCost: Number(raw.recipeCost ?? 0),
       suggestedPrice: Number(raw.preliminarySellingPrice ?? 0),
       ingredients
-    });
+    };
+
+    if (this.editingRecipeId) {
+      this.recipeService.updateRecipe(this.editingRecipeId, payload);
+    } else {
+      this.recipeService.createRecipe(this.shopId, payload);
+    }
 
     this.saveSuccess = true;
+    this.resetForm();
     setTimeout(() => {
       this.saveSuccess = false;
     }, 3000);
   }
 
+  editRecipe(recipe: Recipe): void {
+    this.editingRecipeId = recipe.id ?? null;
+
+    this.recipeForm.patchValue({
+      recipeName: recipe.name,
+      marginPercent: recipe.marginPercent ?? 35
+    });
+
+    this.ingredientsFormArray.clear();
+    for (const ingredient of recipe.ingredients ?? []) {
+      const name = (ingredient.name ?? ingredient.ingredient ?? '').trim();
+      const quantityUsed = Number(ingredient.quantityUsed ?? ingredient.recipeQty ?? 0);
+      const costPerUnit = Number(
+        ingredient.costPerUnit
+          ?? (ingredient.eyPercent && ingredient.purchasedPrice
+            ? (ingredient.purchasedPrice / ingredient.eyPercent) * 100
+            : ingredient.purchasedPrice ?? 0)
+      );
+
+      this.ingredientsFormArray.push(
+        this.createIngredientGroup({
+          stockItemId: ingredient.stockItemId ?? null,
+          name,
+          quantityUsed,
+          costPerUnit
+        })
+      );
+    }
+
+    this.recalculateAll();
+  }
+
+  resetForm(): void {
+    this.editingRecipeId = null;
+    this.recipeForm.patchValue({
+      recipeName: 'Cheese Board',
+      recipeNo: '',
+      date: '2024-01-20',
+      category: '',
+      portions: 1,
+      preparedBy: 'อาร์ม',
+      qFactorPercent: 5,
+      marginPercent: 35,
+      actualMenuPrice: 650,
+      discountPercent: 0
+    });
+
+    this.ingredientsFormArray.clear();
+    for (const seed of this.ingredientSeeds) {
+      this.ingredientsFormArray.push(this.createIngredientGroup(seed));
+    }
+
+    this.recalculateAll();
+  }
+
   private createIngredientGroup(seed: IngredientSeed) {
     return this.fb.group({
-      purchasedPrice: [seed.purchasedPrice, [Validators.required, Validators.min(0)]],
-      purchaseUnit: [seed.purchaseUnit],
-      ingredient: [seed.ingredient, [Validators.required]],
-      eyPercent: [seed.eyPercent, [Validators.required, Validators.min(0.0001)]],
-      recipeQty: [seed.recipeQty, [Validators.required, Validators.min(0)]],
-      recipeUnit: [seed.recipeUnit],
-      individualCost: [{ value: 0, disabled: true }]
+      stockItemId: [seed.stockItemId],
+      name: [seed.name, [Validators.required]],
+      quantityUsed: [seed.quantityUsed, [Validators.required, Validators.min(0)]],
+      costPerUnit: [seed.costPerUnit, [Validators.required, Validators.min(0)]],
+      totalCost: [{ value: 0, disabled: true }]
     });
   }
 
@@ -180,19 +236,18 @@ export class RecipeCostComponent implements OnInit {
     let totalIngredientsCost = 0;
 
     this.ingredientsFormArray.controls.forEach((group) => {
-      const purchasedPrice = Number(group.get('purchasedPrice')?.value ?? 0);
-      const eyPercent = Number(group.get('eyPercent')?.value ?? 0);
-      const recipeQty = Number(group.get('recipeQty')?.value ?? 0);
+      const quantityUsed = Number(group.get('quantityUsed')?.value ?? 0);
+      const costPerUnit = Number(group.get('costPerUnit')?.value ?? 0);
 
-      const individualCost = eyPercent === 0 ? 0 : (purchasedPrice / eyPercent) * 100 * recipeQty;
-      const roundedIndividualCost = this.round(individualCost, 2);
+      const totalCost = quantityUsed * costPerUnit;
+      const roundedTotalCost = this.round(totalCost, 2);
 
-      group.get('individualCost')?.setValue(roundedIndividualCost, { emitEvent: false });
-      totalIngredientsCost += roundedIndividualCost;
+      group.get('totalCost')?.setValue(roundedTotalCost, { emitEvent: false });
+      totalIngredientsCost += roundedTotalCost;
     });
 
     const qFactorPercent = Number(this.recipeForm.controls.qFactorPercent.value ?? 0);
-    const desiredCostPercent = Number(this.recipeForm.controls.desiredCostPercent.value ?? 0);
+    const marginPercent = Number(this.recipeForm.controls.marginPercent.value ?? 0);
     const actualMenuPrice = Number(this.recipeForm.controls.actualMenuPrice.value ?? 0);
     const discountPercent = Number(this.recipeForm.controls.discountPercent.value ?? 0);
 
@@ -200,7 +255,8 @@ export class RecipeCostComponent implements OnInit {
     const recipeCost = totalIngredientsCost + qFactorCost;
 
     // Excel I33: IF(I32=0,0,ROUND(I31/I32,2))
-    const preliminarySellingPrice = desiredCostPercent === 0 ? 0 : this.round(recipeCost / desiredCostPercent, 2);
+    const marginRatio = marginPercent / 100;
+    const preliminarySellingPrice = marginRatio === 0 ? 0 : this.round(recipeCost / marginRatio, 2);
 
     // Excel I36: IF(I35=0,0,ROUND(I31/I35,2))
     const actualCostPercent = actualMenuPrice === 0 ? 0 : this.round(recipeCost / actualMenuPrice, 2);
