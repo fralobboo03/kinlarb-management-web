@@ -152,7 +152,7 @@
       </div>
 
       <p class="error-text" *ngIf="saveError">{{ saveError }}</p>
-      <p class="success-text" *ngIf="saveSuccess">บันทึกสูตรเรียบร้อย</p>
+      <p class="success-text" *ngIf="saveSuccess">{{ successMessage }}</p>
     </mat-card-content>
   </mat-card>
 
@@ -191,6 +191,9 @@
           <td mat-cell *matCellDef="let recipe">
             <button mat-icon-button color="primary" type="button" (click)="editRecipe(recipe)" aria-label="Edit recipe">
               <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" type="button" (click)="deleteRecipe(recipe)" aria-label="Delete recipe">
+              <mat-icon>delete</mat-icon>
             </button>
           </td>
         </ng-container>

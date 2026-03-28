@@ -46,6 +46,7 @@ export class RecipeCostComponent implements OnInit {
   savedRecipes$: Observable<Recipe[]> = of([]);
   saveError = '';
   saveSuccess = false;
+  successMessage = '';
 
   readonly displayedColumns: string[] = [
     'stockItemId',
@@ -117,6 +118,7 @@ export class RecipeCostComponent implements OnInit {
   saveRecipe(): void {
     this.saveError = '';
     this.saveSuccess = false;
+    this.successMessage = '';
 
     if (this.recipeForm.invalid || this.shopId <= 0) {
       this.recipeForm.markAllAsTouched();
@@ -156,8 +158,10 @@ export class RecipeCostComponent implements OnInit {
 
     if (this.editingRecipeId) {
       this.recipeService.updateRecipe(this.editingRecipeId, payload);
+      this.successMessage = 'อัปเดตสูตรเรียบร้อย';
     } else {
       this.recipeService.createRecipe(this.shopId, payload);
+      this.successMessage = 'บันทึกสูตรเรียบร้อย';
     }
 
     this.saveSuccess = true;
@@ -169,6 +173,9 @@ export class RecipeCostComponent implements OnInit {
 
   editRecipe(recipe: Recipe): void {
     this.editingRecipeId = recipe.id ?? null;
+    this.saveError = '';
+    this.saveSuccess = false;
+    this.successMessage = '';
 
     this.recipeForm.patchValue({
       recipeName: recipe.name,
@@ -197,6 +204,37 @@ export class RecipeCostComponent implements OnInit {
     }
 
     this.recalculateAll();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  deleteRecipe(recipe: Recipe): void {
+    if (!recipe.id) {
+      return;
+    }
+
+    const shouldDelete = confirm(`ยืนยันการลบสูตร "${recipe.name}" ?`);
+    if (!shouldDelete) {
+      return;
+    }
+
+    const deleted = this.recipeService.deleteRecipe(recipe.id);
+    if (!deleted) {
+      this.saveError = 'ไม่สามารถลบสูตรได้';
+      return;
+    }
+
+    if (this.editingRecipeId === recipe.id) {
+      this.resetForm();
+    }
+
+    this.saveError = '';
+    this.successMessage = 'ลบสูตรเรียบร้อย';
+    this.saveSuccess = true;
+
+    setTimeout(() => {
+      this.saveSuccess = false;
+      this.successMessage = '';
+    }, 3000);
   }
 
   resetForm(): void {

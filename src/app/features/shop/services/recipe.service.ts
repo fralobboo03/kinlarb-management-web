@@ -91,6 +91,18 @@ export class RecipeService {
     return this.recipesSubject.getValue().find((recipe) => recipe.id === recipeId);
   }
 
+  deleteRecipe(recipeId: number): boolean {
+    const current = this.recipesSubject.getValue();
+    const nextRecipes = current.filter((recipe) => recipe.id !== recipeId);
+
+    if (nextRecipes.length === current.length) {
+      return false;
+    }
+
+    this.saveRecipes(nextRecipes);
+    return true;
+  }
+
   private loadRecipes(): Recipe[] {
     if (!this.isBrowser) {
       return [];
