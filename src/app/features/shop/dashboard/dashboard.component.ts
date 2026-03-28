@@ -276,7 +276,7 @@ export class DashboardComponent implements OnInit {
     const periodBreakdown = this.groupSalesByPeriod(filteredSales, activeFilter.isCustom ? 'daily' : (selectedRange ?? this.defaultPresetRange));
     const menuBreakdown = this.groupSalesByMenu(filteredSales);
     const totalRevenue = filteredSales.reduce((sum, sale) => sum + sale.totalPrice, 0);
-    const totalOrders = filteredSales.length;
+    const totalOrders = filteredSales.reduce((sum, sale) => sum + sale.quantitySold, 0);
     const totalCost = filteredTransactions
       .filter((transaction) => transaction.type === 'IN')
       .reduce((sum, transaction) => sum + (transaction.totalCost ?? transaction.cost ?? 0), 0);
