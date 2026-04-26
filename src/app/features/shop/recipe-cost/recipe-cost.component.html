@@ -4,41 +4,41 @@
       <mat-icon class="title-icon">calculate</mat-icon>
       Recipe Cost Calculator
     </h1>
-    <p class="page-subtitle">ถอดสูตรจากไฟล์ Excel: Pasta_Cheese.xlsx (Sheet: Coldcut Board)</p>
+    <p class="page-subtitle">ระบบคำนวณต้นทุนสูตรแบบกรอกข้อมูลเอง</p>
     <p class="edit-mode-indicator" *ngIf="editingRecipeId">Edit Mode: Recipe #{{ editingRecipeId }}</p>
   </div>
 
   <mat-card class="meta-card">
     <mat-card-content>
-      <form [formGroup]="recipeForm" class="meta-grid">
+      <form [formGroup]="recipeForm" class="meta-grid header-form">
         <mat-form-field appearance="outline">
-          <mat-label>Recipe Name</mat-label>
-          <input matInput formControlName="recipeName">
+          <mat-label>ชื่อสูตร</mat-label>
+          <input matInput formControlName="recipeName" (input)="onAnyInputChange()" placeholder="เช่น Cheese Board Set A">
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Recipe No.</mat-label>
-          <input matInput formControlName="recipeNo">
+          <mat-label>เลขที่สูตร</mat-label>
+          <input matInput formControlName="recipeNo" (input)="onAnyInputChange()" placeholder="เช่น RC-001">
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Date</mat-label>
-          <input matInput type="date" formControlName="date">
+          <mat-label>วันที่</mat-label>
+          <input matInput type="date" formControlName="date" (input)="onAnyInputChange()">
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Category</mat-label>
-          <input matInput formControlName="category">
+          <mat-label>หมวดหมู่</mat-label>
+          <input matInput formControlName="category" (input)="onAnyInputChange()" placeholder="เช่น Coldcut Board">
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>No. of Portion</mat-label>
-          <input matInput type="number" min="0" step="0.01" formControlName="portions">
+          <mat-label>จำนวน Portion</mat-label>
+          <input matInput type="number" min="0" step="0.01" formControlName="portions" (input)="onAnyInputChange()" placeholder="เช่น 1">
         </mat-form-field>
 
         <mat-form-field appearance="outline">
-          <mat-label>Prepared By</mat-label>
-          <input matInput formControlName="preparedBy">
+          <mat-label>ผู้จัดเตรียม</mat-label>
+          <input matInput formControlName="preparedBy" (input)="onAnyInputChange()" placeholder="เช่น Arm">
         </mat-form-field>
       </form>
     </mat-card-content>
@@ -46,60 +46,125 @@
 
   <mat-card class="table-card">
     <mat-card-content>
-      <table mat-table [dataSource]="ingredientsFormArray.controls" class="recipe-table">
-        <ng-container matColumnDef="stockItemId">
-          <th mat-header-cell *matHeaderCellDef>STOCK ITEM ID</th>
-          <td mat-cell *matCellDef="let row">
-            <input class="cell-input align-right" type="number" min="0" step="1" [formControl]="row.get('stockItemId')">
-          </td>
-        </ng-container>
+      <div class="table-header-row">
+        <h2 class="section-title">ตารางวัตถุดิบ</h2>
+        <button mat-stroked-button type="button" class="add-btn" (click)="addIngredient()">
+          + เพิ่มวัตถุดิบ
+        </button>
+      </div>
 
-        <ng-container matColumnDef="name">
-          <th mat-header-cell *matHeaderCellDef>NAME</th>
-          <td mat-cell *matCellDef="let row">
-            <input class="cell-input" [formControl]="row.get('name')">
-          </td>
-        </ng-container>
+      <div class="table-wrapper">
+        <table mat-table [dataSource]="ingredientRows" class="recipe-table">
+          <ng-container matColumnDef="name">
+            <th mat-header-cell *matHeaderCellDef>วัตถุดิบ</th>
+            <td mat-cell *matCellDef="let row; let i = index">
+              <input
+                class="cell-input"
+                [formControl]="row.get('name')"
+                (input)="onAnyInputChange()"
+                (focus)="setActiveIngredient(i)"
+                placeholder="เช่น เชดด้าชีส"
+              >
+            </td>
+          </ng-container>
 
-        <ng-container matColumnDef="quantityUsed">
-          <th mat-header-cell *matHeaderCellDef>QUANTITY USED</th>
-          <td mat-cell *matCellDef="let row">
-            <input class="cell-input align-right" type="number" min="0" step="0.0001" [formControl]="row.get('quantityUsed')">
-          </td>
-        </ng-container>
+          <ng-container matColumnDef="quantityUsed">
+            <th mat-header-cell *matHeaderCellDef>จำนวน</th>
+            <td mat-cell *matCellDef="let row; let i = index">
+              <input
+                class="cell-input align-right"
+                type="number"
+                min="0"
+                step="0.0001"
+                [formControl]="row.get('quantityUsed')"
+                (input)="onAnyInputChange()"
+                (focus)="setActiveIngredient(i)"
+              >
+            </td>
+          </ng-container>
 
-        <ng-container matColumnDef="costPerUnit">
-          <th mat-header-cell *matHeaderCellDef>COST PER UNIT</th>
-          <td mat-cell *matCellDef="let row">
-            <input class="cell-input align-right" type="number" min="0" step="0.01" [formControl]="row.get('costPerUnit')">
-          </td>
-        </ng-container>
+          <ng-container matColumnDef="unit">
+            <th mat-header-cell *matHeaderCellDef>หน่วย</th>
+            <td mat-cell *matCellDef="let row; let i = index">
+              <input
+                class="cell-input"
+                [formControl]="row.get('unit')"
+                (input)="onAnyInputChange()"
+                (focus)="setActiveIngredient(i)"
+                placeholder="เช่น kg, g, ml, pcs"
+              >
+            </td>
+          </ng-container>
 
-        <ng-container matColumnDef="totalCost">
-          <th mat-header-cell *matHeaderCellDef>TOTAL COST</th>
-          <td mat-cell *matCellDef="let row" class="align-right cost-cell">
-            {{ row.get('totalCost')?.value | number:'1.2-2' }}
-          </td>
-        </ng-container>
+          <ng-container matColumnDef="costPerUnit">
+            <th mat-header-cell *matHeaderCellDef>ต้นทุนต่อหน่วย</th>
+            <td mat-cell *matCellDef="let row; let i = index">
+              <input
+                class="cell-input align-right"
+                type="number"
+                min="0"
+                step="0.01"
+                [formControl]="row.get('costPerUnit')"
+                (input)="onAnyInputChange()"
+                (focus)="setActiveIngredient(i)"
+              >
+            </td>
+          </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
+          <ng-container matColumnDef="totalCost">
+            <th mat-header-cell *matHeaderCellDef>ต้นทุนรวม</th>
+            <td mat-cell *matCellDef="let row" class="align-right cost-cell">
+              {{ row.get('totalCost')?.value | number:'1.2-2' }}
+            </td>
+          </ng-container>
+
+          <ng-container matColumnDef="actions">
+            <th mat-header-cell *matHeaderCellDef>Actions</th>
+            <td mat-cell *matCellDef="let row; let i = index" class="actions-cell">
+              <button
+                mat-icon-button
+                type="button"
+                color="warn"
+                (click)="removeIngredient(i)"
+                [disabled]="ingredientsFormArray.length === 1"
+                aria-label="Delete ingredient"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </ng-container>
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr
+            mat-row
+            *matRowDef="let row; let i = index; columns: displayedColumns"
+            [class.active-row]="i === activeIngredientIndex"
+          ></tr>
+        </table>
+      </div>
     </mat-card-content>
   </mat-card>
 
   <mat-card class="summary-card">
     <mat-card-content>
       <div class="summary-grid" [formGroup]="recipeForm">
-        <div class="summary-row">
-          <span>Total Ingredients Cost</span>
+        <div class="summary-row inputs-row readonly-summary-row">
+          <mat-form-field appearance="outline">
+            <mat-label>ต้นทุนวัตถุดิบรวม (ระบบคำนวณอัตโนมัติ)</mat-label>
+            <input
+              matInput
+              [value]="recipeForm.controls.totalIngredientsCost.value | number:'1.2-2'"
+              readonly
+              aria-readonly="true"
+            >
+          </mat-form-field>
           <strong>{{ recipeForm.controls.totalIngredientsCost.value | number:'1.2-2' }}</strong>
         </div>
 
         <div class="summary-row inputs-row">
           <mat-form-field appearance="outline">
-            <mat-label>Q Factor %</mat-label>
-            <input matInput type="number" min="0" step="0.01" formControlName="qFactorPercent">
+            <mat-label>Q Factor (%)</mat-label>
+            <input matInput type="number" min="0" step="0.01" formControlName="qFactorPercent" (input)="onAnyInputChange()">
           </mat-form-field>
           <strong>{{ recipeForm.controls.qFactorCost.value | number:'1.2-2' }}</strong>
         </div>
@@ -111,24 +176,24 @@
 
         <div class="summary-row inputs-row">
           <mat-form-field appearance="outline">
-            <mat-label>Margin %</mat-label>
-            <input matInput type="number" min="0" step="0.01" formControlName="marginPercent">
+            <mat-label>Margin (%)</mat-label>
+            <input matInput type="number" min="0" step="0.01" formControlName="marginPercent" (input)="onAnyInputChange()">
           </mat-form-field>
           <strong>{{ recipeForm.controls.preliminarySellingPrice.value | number:'1.2-2' }}</strong>
         </div>
 
         <div class="summary-row inputs-row">
           <mat-form-field appearance="outline">
-            <mat-label>Actual Menu Price</mat-label>
-            <input matInput type="number" min="0" step="0.01" formControlName="actualMenuPrice">
+            <mat-label>ราคาขายจริง</mat-label>
+            <input matInput type="number" min="0" step="0.01" formControlName="actualMenuPrice" (input)="onAnyInputChange()">
           </mat-form-field>
           <strong>{{ recipeForm.controls.actualCostPercent.value | number:'1.4-4' }}</strong>
         </div>
 
         <div class="summary-row inputs-row">
           <mat-form-field appearance="outline">
-            <mat-label>Discount %</mat-label>
-            <input matInput type="number" min="0" step="0.01" formControlName="discountPercent">
+            <mat-label>ส่วนลด (%)</mat-label>
+            <input matInput type="number" min="0" step="0.01" formControlName="discountPercent" (input)="onAnyInputChange()">
           </mat-form-field>
           <strong>{{ recipeForm.controls.discountAmount.value | number:'1.2-2' }}</strong>
         </div>

@@ -114,11 +114,88 @@ export class RecipeService {
     }
 
     try {
-      const parsed = JSON.parse(payload) as Recipe[];
-      return Array.isArray(parsed) ? parsed : [];
+      const parsed = JSON.parse(payload) as unknown;
+      if (!Array.isArray(parsed)) {
+        return [];
+      }
+
+      const normalizedRecipes = parsed
+        .map((item) => this.normalizeRecipe(item))
+        .filter((recipe): recipe is Recipe => recipe !== null);
+
+      // Persist migrated structure so subsequent reads are consistent with the new UI model.
+      if (this.isBrowser) {
+        localStorage.setItem(this.STORAGE_KEY, JSON.stringify(normalizedRecipes));
+      }
+
+      return normalizedRecipes;
     } catch {
       return [];
     }
+  }
+
+  private normalizeRecipe(value: unknown): Recipe | null {
+    if (!value || typeof value !== 'object') {
+      return null;
+    }
+
+    const record = value as Partial<Recipe> & { ingredients?: unknown[] };
+    const normalizedIngredients = Array.isArray(record.ingredients)
+      ? record.ingredients
+          .map((ingredient) => this.normalizeIngredient(ingredient))
+          .filter((ingredient): ingredient is RecipeIngredient => ingredient !== null)
+      : [];
+
+    const createdAt = typeof record.createdAt === 'string' && record.createdAt.trim().length > 0
+      ? record.createdAt
+      : new Date().toISOString();
+
+    const normalizedRecipe: Recipe = {
+      id: typeof record.id === 'number' ? record.id : Date.now(),
+      shopId: typeof record.shopId === 'number' ? record.shopId : 0,
+      name: typeof record.name === 'string' ? record.name : '',
+      marginPercent: Number(record.marginPercent ?? 0),
+      totalCost: Number(record.totalCost ?? 0),
+      suggestedPrice: Number(record.suggestedPrice ?? 0),
+      ingredients: normalizedIngredients,
+      createdAt
+    };
+
+    return normalizedRecipe;
+  }
+
+  private normalizeIngredient(value: unknown): RecipeIngredient | null {
+    if (!value || typeof value !== 'object') {
+      return null;
+    }
+
+    const ingredient = value as RecipeIngredient;
+    const name = String(ingredient.name ?? ingredient.ingredient ?? '').trim();
+
+    if (!name) {
+      return null;
+    }
+
+    const quantityUsed = Number(ingredient.quantityUsed ?? ingredient.recipeQty ?? 0);
+    const costPerUnit = Number(
+      ingredient.costPerUnit
+        ?? (ingredient.eyPercent && ingredient.purchasedPrice
+          ? (ingredient.purchasedPrice / ingredient.eyPercent) * 100
+          : ingredient.purchasedPrice ?? 0)
+    );
+
+    const totalCost = Number.isFinite(Number(ingredient.totalCost))
+      ? Number(ingredient.totalCost)
+      : quantityUsed * costPerUnit;
+
+    return {
+      stockItemId: ingredient.stockItemId != null ? Number(ingredient.stockItemId) : null,
+      name,
+      quantityUsed,
+      unit: String(ingredient.unit ?? ingredient.recipeUnit ?? ingredient.purchaseUnit ?? '').trim(),
+      costPerUnit,
+      totalCost
+    };
   }
 
   private saveRecipes(recipes: Recipe[]): void {

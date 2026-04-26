@@ -2,6 +2,7 @@ export interface RecipeIngredient {
   stockItemId: number | null;
   name: string;
   quantityUsed: number;
+  unit?: string;
   costPerUnit: number;
   totalCost: number;
   // Legacy compatibility fields from previous recipe-cost implementation.

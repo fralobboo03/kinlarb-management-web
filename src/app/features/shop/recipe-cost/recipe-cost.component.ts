@@ -1,7 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
-import { FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Observable, of } from 'rxjs';
 
 import { MatCardModule } from '@angular/material/card';
@@ -47,48 +47,31 @@ export class RecipeCostComponent implements OnInit {
   saveError = '';
   saveSuccess = false;
   successMessage = '';
+  activeIngredientIndex = 0;
 
   readonly displayedColumns: string[] = [
-    'stockItemId',
     'name',
     'quantityUsed',
+    'unit',
     'costPerUnit',
-    'totalCost'
+    'totalCost',
+    'actions'
   ];
 
   readonly savedRecipeColumns: string[] = ['name', 'marginPercent', 'totalCost', 'suggestedPrice', 'createdAt', 'actions'];
 
-  readonly ingredientSeeds: IngredientSeed[] = [
-    { stockItemId: null, name: 'เชดด้าชีส', quantityUsed: 0.04, costPerUnit: 542 },
-    { stockItemId: null, name: 'บรีชีส', quantityUsed: 0.03, costPerUnit: 1261 },
-    { stockItemId: null, name: 'บลูชีส', quantityUsed: 0.04, costPerUnit: 915 },
-    { stockItemId: null, name: 'กรานาพาดาโน่', quantityUsed: 0.04, costPerUnit: 1093 },
-    { stockItemId: null, name: 'สโมคชีส', quantityUsed: 0.04, costPerUnit: 873 },
-    { stockItemId: null, name: 'แอปเปิ้ล', quantityUsed: 0.5, costPerUnit: 20 },
-    { stockItemId: null, name: 'สตอเบอรี่สด', quantityUsed: 0.03, costPerUnit: 200 },
-    { stockItemId: null, name: 'เคบกู้สเบอรี่สด', quantityUsed: 0.06, costPerUnit: 100 },
-    { stockItemId: null, name: 'บลูเบอรี่', quantityUsed: 0.03, costPerUnit: 200 },
-    { stockItemId: null, name: 'องุ่น', quantityUsed: 0.08, costPerUnit: 100 },
-    { stockItemId: null, name: 'น้ำผึ้ง', quantityUsed: 0.05, costPerUnit: 160 },
-    { stockItemId: null, name: 'มะกอกดำ,เขียว', quantityUsed: 0.05, costPerUnit: 120 },
-    { stockItemId: null, name: 'Salami', quantityUsed: 0.03, costPerUnit: 1500 },
-    { stockItemId: null, name: 'Parma Ham', quantityUsed: 0.03, costPerUnit: 1500 },
-    { stockItemId: null, name: 'Coppa', quantityUsed: 0.03, costPerUnit: 1500 },
-    { stockItemId: null, name: 'C00k Ham', quantityUsed: 0.03, costPerUnit: 600 }
-  ];
-
   readonly recipeForm = this.fb.group({
-    recipeName: ['Cheese Board', [Validators.required]],
+    recipeName: ['', [Validators.required]],
     recipeNo: [''],
-    date: ['2024-01-20'],
+    date: [''],
     category: [''],
-    portions: [1, [Validators.required, Validators.min(0.0001)]],
-    preparedBy: ['อาร์ม'],
-    ingredients: this.fb.array(this.ingredientSeeds.map((seed) => this.createIngredientGroup(seed))),
-    qFactorPercent: [5, [Validators.required, Validators.min(0)]],
-    marginPercent: [35, [Validators.required, Validators.min(0.0001)]],
-    actualMenuPrice: [650, [Validators.required, Validators.min(0)]],
-    discountPercent: [0, [Validators.required, Validators.min(0)]],
+    portions: [null as number | null, [Validators.required, Validators.min(0.0001)]],
+    preparedBy: [''],
+    ingredients: this.fb.array([this.createIngredientGroup()]),
+    qFactorPercent: [null as number | null, [Validators.required, Validators.min(0)]],
+    marginPercent: [null as number | null, [Validators.required, Validators.min(0.0001)]],
+    actualMenuPrice: [null as number | null, [Validators.required, Validators.min(0)]],
+    discountPercent: [null as number | null, [Validators.required, Validators.min(0)]],
     totalIngredientsCost: [{ value: 0, disabled: true }],
     qFactorCost: [{ value: 0, disabled: true }],
     recipeCost: [{ value: 0, disabled: true }],
@@ -100,6 +83,14 @@ export class RecipeCostComponent implements OnInit {
 
   get ingredientsFormArray(): FormArray {
     return this.recipeForm.controls.ingredients;
+  }
+
+  get ingredientRows(): AbstractControl[] {
+    return [...this.ingredientsFormArray.controls];
+  }
+
+  onAnyInputChange(): void {
+    this.recalculateAll();
   }
 
   ngOnInit(): void {
@@ -135,9 +126,10 @@ export class RecipeCostComponent implements OnInit {
 
     const ingredients = (raw.ingredients ?? [])
       .map((ingredient) => ({
-        stockItemId: ingredient?.stockItemId != null ? Number(ingredient.stockItemId) : null,
+        stockItemId: null,
         name: String(ingredient?.name ?? '').trim(),
         quantityUsed: Number(ingredient?.quantityUsed ?? 0),
+        unit: String(ingredient?.unit ?? '').trim(),
         costPerUnit: Number(ingredient?.costPerUnit ?? 0),
         totalCost: Number(ingredient?.totalCost ?? 0)
       }))
@@ -179,13 +171,20 @@ export class RecipeCostComponent implements OnInit {
 
     this.recipeForm.patchValue({
       recipeName: recipe.name,
-      marginPercent: recipe.marginPercent ?? 35
+      recipeNo: '',
+      date: '',
+      category: '',
+      portions: 1,
+      preparedBy: '',
+      qFactorPercent: 0,
+      marginPercent: recipe.marginPercent ?? null
     });
 
     this.ingredientsFormArray.clear();
     for (const ingredient of recipe.ingredients ?? []) {
       const name = (ingredient.name ?? ingredient.ingredient ?? '').trim();
       const quantityUsed = Number(ingredient.quantityUsed ?? ingredient.recipeQty ?? 0);
+      const unit = String(ingredient.unit ?? ingredient.recipeUnit ?? ingredient.purchaseUnit ?? '').trim();
       const costPerUnit = Number(
         ingredient.costPerUnit
           ?? (ingredient.eyPercent && ingredient.purchasedPrice
@@ -195,14 +194,19 @@ export class RecipeCostComponent implements OnInit {
 
       this.ingredientsFormArray.push(
         this.createIngredientGroup({
-          stockItemId: ingredient.stockItemId ?? null,
           name,
           quantityUsed,
+          unit,
           costPerUnit
         })
       );
     }
 
+    if (this.ingredientsFormArray.length === 0) {
+      this.addIngredient();
+    }
+
+    this.activeIngredientIndex = 0;
     this.recalculateAll();
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -240,32 +244,62 @@ export class RecipeCostComponent implements OnInit {
   resetForm(): void {
     this.editingRecipeId = null;
     this.recipeForm.patchValue({
-      recipeName: 'Cheese Board',
+      recipeName: '',
       recipeNo: '',
-      date: '2024-01-20',
+      date: '',
       category: '',
-      portions: 1,
-      preparedBy: 'อาร์ม',
-      qFactorPercent: 5,
-      marginPercent: 35,
-      actualMenuPrice: 650,
-      discountPercent: 0
+      portions: null,
+      preparedBy: '',
+      qFactorPercent: null,
+      marginPercent: null,
+      actualMenuPrice: null,
+      discountPercent: null
     });
 
     this.ingredientsFormArray.clear();
-    for (const seed of this.ingredientSeeds) {
-      this.ingredientsFormArray.push(this.createIngredientGroup(seed));
-    }
+    this.addIngredient();
 
+    this.activeIngredientIndex = 0;
     this.recalculateAll();
   }
 
-  private createIngredientGroup(seed: IngredientSeed) {
+  addIngredient(): void {
+    this.ingredientsFormArray.push(this.createIngredientGroup());
+    this.activeIngredientIndex = this.ingredientsFormArray.length - 1;
+    this.recalculateAll();
+  }
+
+  removeIngredient(index: number): void {
+    if (this.ingredientsFormArray.length <= 1) {
+      this.ingredientsFormArray.at(0).patchValue(
+        {
+          name: '',
+          quantityUsed: 0,
+          unit: '',
+          costPerUnit: 0
+        },
+        { emitEvent: true }
+      );
+      this.activeIngredientIndex = 0;
+      return;
+    }
+
+    this.ingredientsFormArray.removeAt(index);
+    this.activeIngredientIndex = Math.max(0, Math.min(this.activeIngredientIndex, this.ingredientsFormArray.length - 1));
+    this.recalculateAll();
+  }
+
+  setActiveIngredient(index: number): void {
+    this.activeIngredientIndex = index;
+  }
+
+  private createIngredientGroup(seed?: Partial<IngredientSeed> & { unit?: string }) {
     return this.fb.group({
-      stockItemId: [seed.stockItemId],
-      name: [seed.name, [Validators.required]],
-      quantityUsed: [seed.quantityUsed, [Validators.required, Validators.min(0)]],
-      costPerUnit: [seed.costPerUnit, [Validators.required, Validators.min(0)]],
+      stockItemId: [seed?.stockItemId ?? null],
+      name: [seed?.name ?? '', [Validators.required]],
+      quantityUsed: [seed?.quantityUsed ?? 0, [Validators.required, Validators.min(0)]],
+      unit: [seed?.unit ?? ''],
+      costPerUnit: [seed?.costPerUnit ?? 0, [Validators.required, Validators.min(0)]],
       totalCost: [{ value: 0, disabled: true }]
     });
   }
