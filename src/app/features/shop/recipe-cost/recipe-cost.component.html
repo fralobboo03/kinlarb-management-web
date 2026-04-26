@@ -207,8 +207,9 @@
       </div>
 
       <div class="action-row">
-        <button mat-raised-button color="primary" type="button" (click)="saveRecipe()" [disabled]="recipeForm.invalid">
-          <mat-icon>save</mat-icon>
+        <button mat-raised-button color="primary" type="button" (click)="saveRecipe()" [disabled]="recipeForm.invalid || isLoading">
+          <mat-spinner *ngIf="isLoading" diameter="20" class="btn-spinner" style="display: inline-block; margin-right: 8px; vertical-align: middle;"></mat-spinner>
+          <mat-icon *ngIf="!isLoading">save</mat-icon>
           {{ editingRecipeId ? 'Update Recipe' : 'Save Recipe' }}
         </button>
 
@@ -218,8 +219,7 @@
         </button>
       </div>
 
-      <p class="error-text" *ngIf="saveError">{{ saveError }}</p>
-      <p class="success-text" *ngIf="saveSuccess">{{ successMessage }}</p>
+
     </mat-card-content>
   </mat-card>
 

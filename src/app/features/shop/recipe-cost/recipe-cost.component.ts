@@ -1,8 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute } from '@angular/router';
 import { AbstractControl, FormArray, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Observable, of } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
+import { takeUntil, finalize } from 'rxjs/operators';
 
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -12,6 +13,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { Recipe } from '../models/recipe.model';
 import { RecipeService } from '../services/recipe.service';
 
@@ -35,22 +38,25 @@ interface IngredientSeed {
     MatIconModule,
     MatButtonModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatProgressSpinnerModule,
+    MatSnackBarModule
   ],
   templateUrl: './recipe-cost.component.html',
   styleUrl: './recipe-cost.component.scss'
 })
-export class RecipeCostComponent implements OnInit {
+export class RecipeCostComponent implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly recipeService = inject(RecipeService);
+  private readonly snackBar = inject(MatSnackBar);
+
+  private readonly destroy$ = new Subject<void>();
 
   shopId = 0;
   editingRecipeId: number | null = null;
   savedRecipes$: Observable<Recipe[]> = of([]);
-  saveError = '';
-  saveSuccess = false;
-  successMessage = '';
+  isLoading = false;
   activeIngredientIndex = 0;
 
   readonly displayedColumns: string[] = [
@@ -62,7 +68,7 @@ export class RecipeCostComponent implements OnInit {
     'actions'
   ];
 
-  readonly savedRecipeColumns: string[] = ['name', 'marginPercent', 'totalCost', 'suggestedPrice', 'createdAt', 'actions'];
+  readonly savedRecipeColumns: string[] = ['name', 'marginPercent', 'totalCost', 'suggestedPrice', 'actions'];
 
   readonly recipeForm = this.fb.group({
     recipeName: ['', [Validators.required]],
@@ -98,25 +104,34 @@ export class RecipeCostComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.route.parent?.paramMap.subscribe((params) => {
+    this.route.parent?.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       this.shopId = Number(params.get('shopId'));
-      this.savedRecipes$ = this.recipeService.getRecipesByShop(this.shopId);
+      this.loadRecipes();
     });
 
-    this.recipeForm.valueChanges.subscribe(() => {
+    this.recipeForm.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(() => {
       this.recalculateAll();
     });
 
     this.recalculateAll();
   }
 
-  saveRecipe(): void {
-    this.saveError = '';
-    this.saveSuccess = false;
-    this.successMessage = '';
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
 
+  loadRecipes(): void {
+    this.savedRecipes$ = this.recipeService.recipes$;
+    this.recipeService.getRecipesByShop(this.shopId).pipe(takeUntil(this.destroy$)).subscribe({
+      error: (err) => this.showError('Failed to load recipes: ' + err.message)
+    });
+  }
+
+  saveRecipe(): void {
     if (this.recipeForm.invalid || this.shopId <= 0) {
       this.recipeForm.markAllAsTouched();
+      this.showError('ข้อมูลไม่ครบถ้วน');
       return;
     }
 
@@ -124,7 +139,7 @@ export class RecipeCostComponent implements OnInit {
     const recipeName = (raw.recipeName ?? '').trim();
 
     if (!recipeName) {
-      this.saveError = 'กรุณาระบุชื่อสูตร';
+      this.showError('กรุณาระบุชื่อสูตร');
       return;
     }
 
@@ -140,7 +155,7 @@ export class RecipeCostComponent implements OnInit {
       .filter((ingredient) => ingredient.name.length > 0);
 
     if (ingredients.length === 0) {
-      this.saveError = 'กรุณาระบุวัตถุดิบอย่างน้อย 1 รายการ';
+      this.showError('กรุณาระบุวัตถุดิบอย่างน้อย 1 รายการ');
       return;
     }
 
@@ -152,26 +167,41 @@ export class RecipeCostComponent implements OnInit {
       ingredients
     };
 
-    if (this.editingRecipeId) {
-      this.recipeService.updateRecipe(this.editingRecipeId, payload);
-      this.successMessage = 'อัปเดตสูตรเรียบร้อย';
-    } else {
-      this.recipeService.createRecipe(this.shopId, payload);
-      this.successMessage = 'บันทึกสูตรเรียบร้อย';
-    }
+    this.isLoading = true;
 
-    this.saveSuccess = true;
-    this.resetForm();
-    setTimeout(() => {
-      this.saveSuccess = false;
-    }, 3000);
+    if (this.editingRecipeId) {
+      this.recipeService.updateRecipe(this.editingRecipeId, payload)
+        .pipe(
+          takeUntil(this.destroy$),
+          finalize(() => this.isLoading = false)
+        )
+        .subscribe({
+          next: () => {
+             this.showSuccess('อัปเดตสูตรสำเร็จ');
+             this.resetForm();
+             this.loadRecipes();
+          },
+          error: (err) => this.showError('ไม่สามารถอัปเดตสูตรได้: ' + err.message)
+        });
+    } else {
+      this.recipeService.createRecipe(this.shopId, payload)
+        .pipe(
+          takeUntil(this.destroy$),
+          finalize(() => this.isLoading = false)
+        )
+        .subscribe({
+          next: () => {
+             this.showSuccess('บันทึกสูตรสำเร็จ');
+             this.resetForm();
+          },
+          error: (err) => this.showError('ไม่สามารถบันทึกสูตรได้: ' + err.message)
+        });
+    }
   }
 
   editRecipe(recipe: Recipe): void {
-    this.editingRecipeId = recipe.id ?? null;
-    this.saveError = '';
-    this.saveSuccess = false;
-    this.successMessage = '';
+    if (!recipe.id) return;
+    this.editingRecipeId = recipe.id;
 
     this.recipeForm.patchValue({
       recipeName: recipe.name,
@@ -197,12 +227,7 @@ export class RecipeCostComponent implements OnInit {
       );
 
       this.ingredientsFormArray.push(
-        this.createIngredientGroup({
-          name,
-          quantityUsed,
-          unit,
-          costPerUnit
-        })
+        this.createIngredientGroup({ name, quantityUsed, unit, costPerUnit })
       );
     }
 
@@ -224,25 +249,23 @@ export class RecipeCostComponent implements OnInit {
     if (!shouldDelete) {
       return;
     }
-
-    const deleted = this.recipeService.deleteRecipe(recipe.id);
-    if (!deleted) {
-      this.saveError = 'ไม่สามารถลบสูตรได้';
-      return;
-    }
-
-    if (this.editingRecipeId === recipe.id) {
-      this.resetForm();
-    }
-
-    this.saveError = '';
-    this.successMessage = 'ลบสูตรเรียบร้อย';
-    this.saveSuccess = true;
-
-    setTimeout(() => {
-      this.saveSuccess = false;
-      this.successMessage = '';
-    }, 3000);
+    
+    this.isLoading = true;
+    this.recipeService.deleteRecipe(recipe.id)
+      .pipe(
+        takeUntil(this.destroy$),
+        finalize(() => this.isLoading = false)
+      )
+      .subscribe({
+        next: () => {
+          this.showSuccess('ลบสูตรสำเร็จ');
+          if (this.editingRecipeId === recipe.id) {
+            this.resetForm();
+          }
+          this.loadRecipes();
+        },
+        error: (err) => this.showError('ไม่สามารถลบสูตรได้: ' + err.message)
+      });
   }
 
   resetForm(): void {
@@ -330,17 +353,13 @@ export class RecipeCostComponent implements OnInit {
     const qFactorCost = totalIngredientsCost * (qFactorPercent / 100);
     const recipeCost = totalIngredientsCost + qFactorCost;
 
-    // Excel I33: IF(I32=0,0,ROUND(I31/I32,2))
     const marginRatio = marginPercent / 100;
     const preliminarySellingPrice = marginRatio === 0 ? 0 : this.round(recipeCost / marginRatio, 2);
 
-    // Excel I36: IF(I35=0,0,ROUND(I31/I35,2))
     const actualCostPercent = actualMenuPrice === 0 ? 0 : this.round(recipeCost / actualMenuPrice, 2);
 
-    // Excel I38: ROUND(I35*H38%,2)
     const discountAmount = this.round(actualMenuPrice * (discountPercent / 100), 2);
 
-    // Excel I39: IF(I38=0,0,ROUND((I31/(I35-I38))-(I31/I35),4))
     const discountResultsCostPercent =
       discountAmount === 0 || actualMenuPrice === 0 || actualMenuPrice === discountAmount
         ? 0
@@ -358,5 +377,13 @@ export class RecipeCostComponent implements OnInit {
   private round(value: number, decimals: number): number {
     const factor = Math.pow(10, decimals);
     return Math.round((value + Number.EPSILON) * factor) / factor;
+  }
+
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: 3000, panelClass: ['success-snackbar'] });
+  }
+
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Close', { duration: 5000, panelClass: ['error-snackbar'] });
   }
 }
