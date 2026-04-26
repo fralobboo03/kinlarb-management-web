@@ -80,7 +80,7 @@ export class RecipeCostComponent implements OnInit, OnDestroy {
     ingredients: this.fb.array([this.createIngredientGroup()]),
     qFactorPercent: [null as number | null, [Validators.required, Validators.min(0)]],
     marginPercent: [null as number | null, [Validators.required, Validators.min(0.0001)]],
-    actualMenuPrice: [null as number | null, [Validators.required, Validators.min(0)]],
+    suggestedPrice: [null as number | null, [Validators.required, Validators.min(0)]],
     discountPercent: [null as number | null, [Validators.required, Validators.min(0)]],
     totalIngredientsCost: [{ value: 0, disabled: true }],
     qFactorCost: [{ value: 0, disabled: true }],
@@ -211,7 +211,9 @@ export class RecipeCostComponent implements OnInit, OnDestroy {
       portions: 1,
       preparedBy: '',
       qFactorPercent: 0,
-      marginPercent: recipe.marginPercent ?? null
+      marginPercent: recipe.marginPercent ?? null,
+      suggestedPrice: recipe.suggestedPrice ?? null,
+      discountPercent: 0
     });
 
     this.ingredientsFormArray.clear();
@@ -279,7 +281,7 @@ export class RecipeCostComponent implements OnInit, OnDestroy {
       preparedBy: '',
       qFactorPercent: null,
       marginPercent: null,
-      actualMenuPrice: null,
+      suggestedPrice: null,
       discountPercent: null
     });
 
@@ -347,7 +349,7 @@ export class RecipeCostComponent implements OnInit, OnDestroy {
 
     const qFactorPercent = Number(this.recipeForm.controls.qFactorPercent.value ?? 0);
     const marginPercent = Number(this.recipeForm.controls.marginPercent.value ?? 0);
-    const actualMenuPrice = Number(this.recipeForm.controls.actualMenuPrice.value ?? 0);
+    const suggestedPrice = Number(this.recipeForm.controls.suggestedPrice.value ?? 0);
     const discountPercent = Number(this.recipeForm.controls.discountPercent.value ?? 0);
 
     const qFactorCost = totalIngredientsCost * (qFactorPercent / 100);
@@ -356,14 +358,14 @@ export class RecipeCostComponent implements OnInit, OnDestroy {
     const marginRatio = marginPercent / 100;
     const preliminarySellingPrice = marginRatio === 0 ? 0 : this.round(recipeCost / marginRatio, 2);
 
-    const actualCostPercent = actualMenuPrice === 0 ? 0 : this.round(recipeCost / actualMenuPrice, 2);
+    const actualCostPercent = suggestedPrice === 0 ? 0 : this.round(recipeCost / suggestedPrice, 2);
 
-    const discountAmount = this.round(actualMenuPrice * (discountPercent / 100), 2);
+    const discountAmount = this.round(suggestedPrice * (discountPercent / 100), 2);
 
     const discountResultsCostPercent =
-      discountAmount === 0 || actualMenuPrice === 0 || actualMenuPrice === discountAmount
+      discountAmount === 0 || suggestedPrice === 0 || suggestedPrice === discountAmount
         ? 0
-        : this.round((recipeCost / (actualMenuPrice - discountAmount)) - (recipeCost / actualMenuPrice), 4);
+        : this.round((recipeCost / (suggestedPrice - discountAmount)) - (recipeCost / suggestedPrice), 4);
 
     this.recipeForm.controls.totalIngredientsCost.setValue(this.round(totalIngredientsCost, 2), { emitEvent: false });
     this.recipeForm.controls.qFactorCost.setValue(this.round(qFactorCost, 2), { emitEvent: false });
