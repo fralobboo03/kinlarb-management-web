@@ -24,4 +24,9 @@ export interface Recipe {
   suggestedPrice: number;
   ingredients: RecipeIngredient[];
   createdAt: string;
+  date: Date;
+  category: string;
+  portions: number;
+  preparedBy: string;
+  recipeNo: string;
 }

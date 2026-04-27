@@ -73,9 +73,9 @@ export class RecipeCostComponent implements OnInit, OnDestroy {
   readonly recipeForm = this.fb.group({
     recipeName: ['', [Validators.required]],
     recipeNo: [''],
-    date: [''],
+    date: [new Date()],
     category: [''],
-    portions: [null as number | null, [Validators.required, Validators.min(0.0001)]],
+    portions: [null as number | null, [Validators.required, Validators.min(0)]],
     preparedBy: [''],
     ingredients: this.fb.array([this.createIngredientGroup()]),
     qFactorPercent: [null as number | null, [Validators.required, Validators.min(0)]],
@@ -164,6 +164,11 @@ export class RecipeCostComponent implements OnInit, OnDestroy {
       marginPercent: Number(raw.marginPercent ?? 0),
       totalCost: Number(raw.recipeCost ?? 0),
       suggestedPrice: Number(raw.preliminarySellingPrice ?? 0),
+      recipeNo: raw.recipeNo ?? '',
+      date: new Date(raw.date ?? ''),
+      category: raw.category ?? '',
+      portions: raw.portions ?? 0,
+      preparedBy: raw.preparedBy ?? '',
       ingredients
     };
 
@@ -205,11 +210,11 @@ export class RecipeCostComponent implements OnInit, OnDestroy {
 
     this.recipeForm.patchValue({
       recipeName: recipe.name,
-      recipeNo: '',
-      date: '',
-      category: '',
-      portions: 1,
-      preparedBy: '',
+      recipeNo: recipe.recipeNo ?? '',
+      date: recipe.date,
+      category: recipe.category ?? '',
+      portions: recipe.portions ?? 0,
+      preparedBy: recipe.preparedBy ?? '',
       qFactorPercent: 0,
       marginPercent: recipe.marginPercent ?? null,
       suggestedPrice: recipe.suggestedPrice ?? null,
@@ -275,7 +280,7 @@ export class RecipeCostComponent implements OnInit, OnDestroy {
     this.recipeForm.patchValue({
       recipeName: '',
       recipeNo: '',
-      date: '',
+      date: null,
       category: '',
       portions: null,
       preparedBy: '',
