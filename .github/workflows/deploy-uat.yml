@@ -60,6 +60,11 @@ jobs:
             
             # Log in to GHCR on the droplet
             echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+            export GH_USERNAME=${{ github.actor }}
+            export DB_URL=${{ secrets.DB_URL }}
+            export DB_USERNAME=${{ secrets.DB_USERNAME }}
+            export DB_PASSWORD=${{ secrets.DB_PASSWORD }}
             
             # Pull the new image and restart the service
             docker compose pull frontend
